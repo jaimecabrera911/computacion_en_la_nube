@@ -302,6 +302,8 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 guideline_chunks = []
 docs_dir = os.path.join(os.getcwd(), "data", "documents")
+if not os.path.exists(docs_dir):
+    docs_dir = os.path.join(os.path.dirname(os.getcwd()), "data", "documents")
 
 for fname, meta in DOC_METADATA.items():
     fpath = os.path.join(docs_dir, fname)
