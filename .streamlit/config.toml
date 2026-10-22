@@ -8,6 +8,13 @@ font = "sans serif"
 
 [server]
 runOnSave = false
+# El watcher de archivos de Streamlit recorre TODOS los módulos instalados al
+# arrancar y escupe cientos de errores falsos de `transformers` (módulos
+# opcionales que requieren `torchvision`, que no usa este proyecto).
+# Desactivarlo deja el log limpio para la grabación de la sustentación.
+# Consecuencia: tras editar app/app_sustentacion.py hay que reiniciar la app
+# (Ctrl+C y volver a ejecutar `uv run streamlit run app/app_sustentacion.py`).
+fileWatcherType = "none"
 
 [browser]
 gatherUsageStats = false
