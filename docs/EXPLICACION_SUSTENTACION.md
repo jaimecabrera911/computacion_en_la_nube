@@ -211,5 +211,6 @@ Respuestas honestas y sólidas (valoran la madurez del proyecto):
 | `docs/ARQUITECTURA.md` | Explicar el diagrama de arquitectura con detalle técnico. |
 | `docs/RESULTADOS.md` | Citar las métricas exactas sin inventar números. |
 | `docs/RUBRICA_CHECKLIST.md` | Saber dónde está la evidencia de cada criterio de la rúbrica. |
-| `GUION_SUSTENTACION_VIDEO.md` | Guion literal minuto a minuto del video. |
+| `GUION_SUSTENTACION_VIDEO.md` | Guion literal minuto a minuto del video (4:15). |
+| `GUION_3_MINUTOS.md` | Versión corta de 3 minutos, en lenguaje sencillo, lista para leer tal cual. |
 | `output/benchmark_summary.json` | Fuente de verdad de los números (la genera el pipeline). |

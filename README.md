@@ -58,6 +58,7 @@ Fuentes (dataset tabular + 3 guías clínicas)
 | [`docs/RESULTADOS.md`](docs/RESULTADOS.md) | Métricas **medidas** del benchmark (se regenera solo: `uv run rag report`). |
 | [`docs/RUBRICA_CHECKLIST.md`](docs/RUBRICA_CHECKLIST.md) | Mapa de cada criterio de la rúbrica → archivo que lo evidencia, con los pendientes marcados. |
 | [`GUION_SUSTENTACION_VIDEO.md`](GUION_SUSTENTACION_VIDEO.md) | Guion literal minuto a minuto del video de 3-5 minutos. |
+| [`GUION_3_MINUTOS.md`](GUION_3_MINUTOS.md) | **Versión corta de 3 minutos**, en lenguaje sencillo y casi para leer tal cual, con plan B si falla la demo. |
 
 ---
 
