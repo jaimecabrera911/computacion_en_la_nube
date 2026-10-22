@@ -21,6 +21,7 @@ import argparse
 import json
 import logging
 import sys
+import time
 
 from qdrant_client.http import models
 
@@ -152,6 +153,22 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _fila_compacta(rank: int, res: dict) -> str:
+    """Fila resumida de un resultado: score, paciente, edad, sexo, enfermedad y riesgo."""
+    meta = res["metadata"]
+    if meta.get("patient_id") is not None:
+        fuente = f"Paciente #{meta['patient_id']}"
+        extra = (
+            f"{meta.get('age', '?')} años · {meta.get('sex', '?')} · "
+            f"{'enfermedad' if meta.get('disease_present') else 'sin enfermedad'} · "
+            f"{meta.get('risk_level', '?')}"
+        )
+    else:
+        fuente = meta.get("title", "documento")
+        extra = meta.get("doc_type", "?")
+    return f"  {f'[{rank}]':<6}{res['score']:>7.4f}  │  {fuente:<40}│  {extra}"
+
+
 def cmd_ask(args: argparse.Namespace) -> int:
     """Ejecuta una consulta semántica puntual."""
     from rag.pipeline import load_embedding_model
@@ -167,6 +184,7 @@ def cmd_ask(args: argparse.Namespace) -> int:
         risk=args.risk,
     )
 
+    t0 = time.perf_counter()
     results = semantic_search(
         client=client,
         model=model,
@@ -175,18 +193,37 @@ def cmd_ask(args: argparse.Namespace) -> int:
         limit=args.top_k,
         query_filter=query_filter,
     )
+    args.elapsed_ms = (time.perf_counter() - t0) * 1000
 
     print("\n" + "=" * 78)
     print(f"CONSULTA: {args.query}")
     print(f"FILTRO  : {FILTER_LABELS.get(args.filter, args.filter)}")
-    if query_filter is not None:
-        print(f"CONDICIONES COMPUESTAS: {args.sex or 'cualquier sexo'} · "
-              f"edad ≥ {args.min_age if args.min_age is not None else '-'} · "
-              f"enfermedad: {args.disease or 'cualquiera'}")
+    if query_filter is not None and (args.sex or args.min_age or args.disease or args.risk or args.max_age):
+        partes = []
+        if args.sex:
+            partes.append(f"sexo={args.sex}")
+        if args.min_age is not None:
+            partes.append(f"edad>={args.min_age}")
+        if args.max_age is not None:
+            partes.append(f"edad<={args.max_age}")
+        if args.disease:
+            partes.append(f"enfermedad={args.disease}")
+        if args.risk:
+            partes.append(f"riesgo={args.risk}")
+        print(f"CONDICIONES: {' · '.join(partes)}")
     print("=" * 78)
     if not results:
         print("No se encontraron resultados con ese filtro.")
         return 1
+
+    if args.brief:
+        # Modo compacto: ideal para grabar en video.
+        print(f"\n  {'RANK':<6}{'SCORE':>7}  │  {'FUENTE':<40}│  DETALLE")
+        for rank, res in enumerate(results, start=1):
+            print(_fila_compacta(rank, res))
+        print(f"\n  {len(results)} resultados en {args.elapsed_ms:.0f} ms\n")
+        return 0
+
     for rank, res in enumerate(results, start=1):
         meta = res["metadata"]
         source = meta.get("title") or f"Paciente #{meta.get('patient_id', 'N/A')}"
@@ -346,6 +383,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Filtro por enfermedad coronaria confirmada: true / false.",
     )
     p.add_argument("--risk", default=None, help="Filtro por nivel de riesgo (Bajo, Alto, ...).")
+    p.add_argument(
+        "--brief",
+        "-b",
+        action="store_true",
+        help="Salida compacta en tabla (ideal para demos en video).",
+    )
     p.set_defaults(func=cmd_ask)
 
     p = sub.add_parser("chat", help="Consola interactiva de consultas.")
