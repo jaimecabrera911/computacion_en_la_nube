@@ -162,7 +162,61 @@ Los **números exactos y verificados** están en `docs/RESULTADOS.md` y en
 
 ---
 
-## 8. Glosario rápido (por si te preguntan un término)
+## 8. Caso de demostración estrella: por qué el filtro importa más que el score
+
+Esta es **la prueba más potente para la defensa**, porque contrasta dos ejecuciones de la misma
+consulta y muestra que el sistema no solo "busca texto", sino que **aplica criterios clínicos**.
+
+**Consulta:** `paciente masculino, mayor de 60 años, con enfermedad coronaria confirmada`
+
+### A) Con filtro simple (solo `doc_type = patient_record`)
+
+| Rank | Score | Paciente | Edad | ¿Enfermedad confirmada? | Cumple el perfil pedido |
+|---|---|---|---|---|---|
+| 1 | 0.6375 | #21 | 64 | ❌ no | parcial |
+| 2 | 0.6371 | #42 | 40 | ❌ no | ❌ |
+| 3 | 0.6369 | #299 | 45 | ✅ sí | ❌ (45 años) |
+| 4 | 0.6202 | #275 | 59 | ✅ sí | ❌ (59 años) |
+| 5 | 0.6163 | #15 | 52 | ❌ no | ❌ |
+
+> ⚠️ **El score más alto (0.6375) corresponde a un paciente que NO cumple los criterios.**
+> El buscador devolvió lo *más parecido en texto*, no lo *clínicamente correcto*.
+
+### B) Con filtro compuesto (`sex` + `disease_present` + `age ≥ 60`)
+
+| Rank | Score | Paciente | Edad | ¿Enfermedad confirmada? | Cumple el perfil pedido |
+|---|---|---|---|---|---|
+| 1 | 0.6115 | #244 | 61 | ✅ sí | ✅ |
+| 2 | 0.5993 | #25 | 60 | ✅ sí | ✅ |
+| 3 | 0.5976 | #188 | 66 | ✅ sí | ✅ |
+| 4 | 0.5950 | #246 | 67 | ✅ sí | ✅ |
+| 5 | 0.5943 | #72 | 67 | ✅ sí | ✅ |
+
+### Las tres conclusiones que puedes decir en voz alta
+
+1. **El score mide similitud semántica, no veracidad clínica.** Con el filtro compuesto los scores
+   son *más bajos* (0.6115 vs 0.6375) y sin embargo **las respuestas son correctas**. La similitud
+   mide qué tan parecidas son dos frases; el filtro decide quién es un candidato válido.
+2. **Los índices de payload convierten una búsqueda en una consulta clínica.** Cuatro condiciones
+   (tipo de documento, sexo, enfermedad confirmada y edad) se aplican en la **misma pasada** del
+   índice HNSW, sin recorrer el corpus completo.
+3. **El filtro además mejora la latencia:** ~204 ms con filtro compuesto frente a ~595 ms con el
+   filtro simple, porque el conjunto candidato se reduce antes de ordenar por similitud.
+
+> En toda la colección existen **39 pacientes** que cumplen exactamente ese perfil (hombres, con
+> enfermedad confirmada, ≥ 60 años), con edades entre 60 y 77 años. Subiendo `--top-k` se puede
+> recorrer el grupo completo.
+
+### Cómo reproducirlo
+
+```bash
+uv run rag ask "paciente masculino, mayor de 60 años, con enfermedad coronaria confirmada" \
+  -f patients --sex Masculino --min-age 60 --disease true -k 5
+```
+
+---
+
+## 9. Glosario rápido (por si te preguntan un término)
 
 | Término | Definición en una línea |
 |---|---|
@@ -186,7 +240,7 @@ Los **números exactos y verificados** están en `docs/RESULTADOS.md` y en
 
 ---
 
-## 9. Si te preguntan "¿qué haría distinto?"
+## 10. Si te preguntan "¿qué haría distinto?"
 
 Respuestas honestas y sólidas (valoran la madurez del proyecto):
 
@@ -204,7 +258,7 @@ Respuestas honestas y sólidas (valoran la madurez del proyecto):
 
 ---
 
-## 10. Documentos relacionados
+## 11. Documentos relacionados
 
 | Documento | Para qué te sirve |
 |---|---|

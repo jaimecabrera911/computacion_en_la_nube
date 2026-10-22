@@ -47,13 +47,55 @@ FILTER_LABELS = {
 }
 
 
-def _build_filter(filter_type: str) -> models.Filter | None:
+def _build_filter(
+    filter_type: str = "all",
+    *,
+    sex: str | None = None,
+    min_age: int | None = None,
+    max_age: int | None = None,
+    disease: str | None = None,
+    risk: str | None = None,
+) -> models.Filter | None:
+    """
+    Construye el filtro de metadatos combinando las condiciones solicitadas.
+
+    Todas las condiciones se aplican con AND sobre los índices de payload de
+    Qdrant, de modo que el filtro y la búsqueda vectorial se resuelven en la
+    misma pasada del índice HNSW.
+    """
+    condiciones: list[models.Condition] = []
+
     doc_type = FILTER_CHOICES.get(filter_type)
-    if doc_type is None:
+    if doc_type is not None:
+        condiciones.append(
+            models.FieldCondition(key="doc_type", match=models.MatchValue(value=doc_type))
+        )
+    if sex:
+        condiciones.append(
+            models.FieldCondition(key="sex", match=models.MatchValue(value=sex))
+        )
+    if disease in {"true", "sí", "si", "confirmada", "1"}:
+        condiciones.append(
+            models.FieldCondition(key="disease_present", match=models.MatchValue(value=True))
+        )
+    elif disease in {"false", "no", "0"}:
+        condiciones.append(
+            models.FieldCondition(key="disease_present", match=models.MatchValue(value=False))
+        )
+    if min_age is not None or max_age is not None:
+        rango = models.Range(
+            gte=min_age if min_age is not None else None,
+            lte=max_age if max_age is not None else None,
+        )
+        condiciones.append(models.FieldCondition(key="age", range=rango))
+    if risk:
+        condiciones.append(
+            models.FieldCondition(key="risk_level", match=models.MatchValue(value=risk))
+        )
+
+    if not condiciones:
         return None
-    return models.Filter(
-        must=[models.FieldCondition(key="doc_type", match=models.MatchValue(value=doc_type))]
-    )
+    return models.Filter(must=condiciones)
 
 
 # --------------------------------------------------------------------------- #
@@ -116,7 +158,14 @@ def cmd_ask(args: argparse.Namespace) -> int:
 
     client = get_qdrant_client()
     model = load_embedding_model()
-    query_filter = _build_filter(args.filter)
+    query_filter = _build_filter(
+        args.filter,
+        sex=args.sex,
+        min_age=args.min_age,
+        max_age=args.max_age,
+        disease=args.disease,
+        risk=args.risk,
+    )
 
     results = semantic_search(
         client=client,
@@ -130,6 +179,10 @@ def cmd_ask(args: argparse.Namespace) -> int:
     print("\n" + "=" * 78)
     print(f"CONSULTA: {args.query}")
     print(f"FILTRO  : {FILTER_LABELS.get(args.filter, args.filter)}")
+    if query_filter is not None:
+        print(f"CONDICIONES COMPUESTAS: {args.sex or 'cualquier sexo'} · "
+              f"edad ≥ {args.min_age if args.min_age is not None else '-'} · "
+              f"enfermedad: {args.disease or 'cualquiera'}")
     print("=" * 78)
     if not results:
         print("No se encontraron resultados con ese filtro.")
@@ -166,7 +219,18 @@ def cmd_chat(args: argparse.Namespace) -> int:
             return 0
         if not user_input:
             continue
-        cmd_ask(argparse.Namespace(query=user_input, top_k=args.top_k, filter=args.filter))
+        cmd_ask(
+            argparse.Namespace(
+                query=user_input,
+                top_k=args.top_k,
+                filter=args.filter,
+                sex=args.sex,
+                min_age=args.min_age,
+                max_age=args.max_age,
+                disease=args.disease,
+                risk=args.risk,
+            )
+        )
 
 
 def cmd_poster(args: argparse.Namespace) -> int:
@@ -273,11 +337,25 @@ def build_parser() -> argparse.ArgumentParser:
         default="all",
         help="Filtro por tipo de documento.",
     )
+    p.add_argument("--sex", default=None, help="Filtro por sexo (Masculino / Femenino).")
+    p.add_argument("--min-age", type=int, default=None, help="Edad mínima (inclusive).")
+    p.add_argument("--max-age", type=int, default=None, help="Edad máxima (inclusive).")
+    p.add_argument(
+        "--disease",
+        default=None,
+        help="Filtro por enfermedad coronaria confirmada: true / false.",
+    )
+    p.add_argument("--risk", default=None, help="Filtro por nivel de riesgo (Bajo, Alto, ...).")
     p.set_defaults(func=cmd_ask)
 
     p = sub.add_parser("chat", help="Consola interactiva de consultas.")
     p.add_argument("--top-k", "-k", type=int, default=3)
     p.add_argument("--filter", "-f", choices=list(FILTER_CHOICES), default="all")
+    p.add_argument("--sex", default=None)
+    p.add_argument("--min-age", type=int, default=None)
+    p.add_argument("--max-age", type=int, default=None)
+    p.add_argument("--disease", default=None)
+    p.add_argument("--risk", default=None)
     p.set_defaults(func=cmd_chat)
 
     p = sub.add_parser("queries", help="Muestra la batería oficial de consultas.")
