@@ -1,9 +1,12 @@
 [theme]
-base = "dark"
-primaryColor = "#4CC9F0"
-backgroundColor = "#0A0F1E"
-secondaryBackgroundColor = "#121A30"
-textColor = "#E9EEF7"
+# Tema base alineado con el diseño de expediente clínico (app/theme.py).
+# Si este bloque queda en oscuro, el chrome nativo de Streamlit asoma oscuro
+# alrededor del CSS propio y el conjunto se ve parcheado.
+base = "light"
+primaryColor = "#22485E"
+backgroundColor = "#E9EAE6"
+secondaryBackgroundColor = "#FBFBF9"
+textColor = "#1C1F1D"
 font = "sans serif"
 
 [server]

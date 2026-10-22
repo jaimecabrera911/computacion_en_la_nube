@@ -1,0 +1,20 @@
+.git/
+.gitignore
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.ori/
+.kilo/
+.commandcode/
+.vscode/
+.idea/
+tests/
+notebooks/
+output/_tmp_*
+# El .env NUNCA se copia a la imagen: las credenciales llegan por --env-file
+# o por los secretos del orquestador.
+.env

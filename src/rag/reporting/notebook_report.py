@@ -229,14 +229,41 @@ def build_pdf(notebook_path: Path, output_path: Path) -> Path:
 def build_html(notebook_path: Path, output_path: Path) -> Path:
     """Construye el informe HTML del notebook (ligero, sin CDN)."""
     nb = _read_notebook(notebook_path)
+    # El informe comparte el sistema de diseño de la app (metáfora de
+    # expediente clínico): papel, tinta, azul de escribir y mono para los
+    # datos. Ver app/theme.py.
     partes: list[str] = [
         "<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'>",
         "<title>Informe del Notebook — ACA N° 1</title>",
-        "<style>body{font-family:system-ui,sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem;color:#0f172a}"
-        "h1{color:#0f2942}h2{color:#0f2942}pre{background:#f4f8fa;border:1px solid #d1e3ec;padding:.8rem;"
-        "overflow-x:auto;font-size:.82rem;border-radius:6px}"
-        ".out{background:#fafbfc;border-left:3px solid #226b80;padding:.6rem .8rem;white-space:pre-wrap;font-size:.8rem}"
-        "img{max-width:100%}</style></head><body>",
+        "<link rel='preconnect' href='https://fonts.googleapis.com'>",
+        "<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>",
+        "<link href='https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600'"
+        "&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;600;700'"
+        "&display=swap' rel='stylesheet'>",
+        "<style>"
+        ":root{--papel:#E9EAE6;--hoja:#FBFBF9;--tinta:#1C1F1D;--tinta-2:#5A615C;"
+        "--tinta-3:#8A918B;--regla:#C4C9C2;--regla-suave:#DCDED8;--azul:#22485E;--sello:#8C3A2E;"
+        "--sombra:3px 3px 0 rgba(28,31,29,.09)}"
+        "body{font-family:'IBM Plex Sans',system-ui,sans-serif;max-width:900px;margin:2.5rem auto;"
+        "padding:0 1.4rem;color:var(--tinta);background-color:var(--papel);"
+        "background-image:repeating-linear-gradient(to bottom,transparent 0 29px,rgba(28,31,29,.028) 29px 30px);"
+        "line-height:1.65}"
+        "h1,h2{font-family:'IBM Plex Serif',Georgia,serif;color:var(--tinta);letter-spacing:-.012em}"
+        "h1{font-size:1.9rem;margin:0 0 .6rem;padding-top:1rem;border-top:6px solid var(--azul);"
+        "display:inline-block}"
+        "h2{font-size:1.25rem;margin:2rem 0 .6rem;padding-bottom:.4rem;border-bottom:1px solid var(--regla)}"
+        "p{color:var(--tinta-2)}"
+        "b{color:var(--tinta);font-weight:600}"
+        "code{font-family:'IBM Plex Mono',monospace;background:rgba(34,72,94,.08);border:1px solid rgba(34,72,94,.14);"
+        "border-radius:2px;padding:.05em .3em;font-size:.86em;color:var(--azul)}"
+        "pre{font-family:'IBM Plex Mono',monospace;background:var(--hoja);border:1px solid var(--regla);"
+        "box-shadow:var(--sombra);padding:.9rem 1rem;overflow-x:auto;font-size:.8rem;border-radius:2px;line-height:1.5}"
+        "pre code{background:none;border:none;padding:0;color:var(--tinta-2)}"
+        ".out{font-family:'IBM Plex Mono',monospace;background:var(--hoja);border:1px solid var(--regla);"
+        "border-left:3px solid var(--azul);box-shadow:var(--sombra);padding:.7rem .9rem;white-space:pre-wrap;"
+        "font-size:.79rem;line-height:1.55;color:var(--tinta-2)}"
+        "img{max-width:100%;border:1px solid var(--regla);box-shadow:var(--sombra);background:var(--hoja)}"
+        "</style></head><body>",
         "<h1>Informe del Notebook Reproducible — ACA N° 1</h1>",
         f"<p><b>Cuaderno:</b> {notebook_path.name} · <b>Colección:</b> {settings.collection_name} · "
         f"<b>Modelo:</b> {settings.embedding_model_name}</p>",

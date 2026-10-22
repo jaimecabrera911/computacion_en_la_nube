@@ -1,0 +1,53 @@
+# ---------------------------------------------------------------------------
+# Unidad systemd — despliegue sin contenedor en un servidor Ubuntu/Debian
+#
+#   sudo cp deploy/computacion-nube.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now computacion-nube
+#   sudo systemctl status computacion-nube
+#   journalctl -u computacion-nube -f
+#
+# La app escucha SOLO en localhost:8501 y el acceso público lo termina nginx
+# con TLS (ver deploy/nginx.conf).
+# ---------------------------------------------------------------------------
+[Unit]
+Description=ACA N° 1 - Sistema RAG Cloud Serverless en Salud (Streamlit)
+Documentation=file:///opt/computacion-en-la-nube/docs/DEPLOY.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=rag
+Group=rag
+WorkingDirectory=/opt/computacion-en-la-nube
+
+# uv -> venv ya instalado en /opt/computacion-en-la-nube/.venv
+Environment="PATH=/opt/computacion-en-la-nube/.venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="HF_HOME=/opt/computacion-en-la-nube/.cache/huggingface"
+Environment="STREAMLIT_SERVER_HEADLESS=true"
+Environment="STREAMLIT_BROWSER_GATHER_USAGE_STATS=false"
+
+ExecStart=/opt/computacion-en-la-nube/.venv/bin/streamlit run app/app_sustentacion.py \
+    --server.address=127.0.0.1 \
+    --server.port=8501 \
+    --server.headless=true
+
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGINT
+
+# Endurecimiento ligero
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/opt/computacion-en-la-nube/output /opt/computacion-en-la-nube/.cache
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=computacion-nube
+
+[Install]
+WantedBy=multi-user.target
