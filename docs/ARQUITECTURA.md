@@ -94,7 +94,76 @@
 
 ---
 
-## 3. Modelo de datos (payload de cada punto)
+## 3. Refinamiento del PASO 5: interpretación automática de la consulta
+
+> **Encuadre normativo:** esto **no** agrega un paso al pipeline ni una herramienta al
+> ecosistema. Es parte de la *"función de consulta"* que el ACA N° 1 pide en el PASO 5
+> (*"captures una pregunta del usuario, la vectorices, ejecutes la búsqueda por similitud y
+> recuperes los fragmentos más relevantes"*), y no introduce dependencias, APIs ni costo.
+
+### El problema que resuelve
+
+Un modelo de embeddings **no es un modelo de lenguaje que razona**: es una función
+`texto → vector`. No puede comparar números ni seguir instrucciones. Por eso pedir
+*"mayor de 60 años"* dentro del texto de una consulta **no** restringe la edad de los
+resultados: esa frase solo aporta una dirección semántica, no una condición.
+
+Medido en este proyecto: la similitud media de los pacientes es **plana** respecto a la edad
+(0.5656 en 30-49 años, 0.5672 en 50-59, 0.5620 en 60-69, 0.5445 en 70-80) y el mejor score de
+la consulta *"paciente masculino mayor de 60 años con enfermedad coronaria confirmada"*
+(0.6375) corresponde a un paciente **de 64 años sin enfermedad confirmada**.
+
+### La solución: separar interpretación y similitud
+
+```
+pregunta en lenguaje natural
+        ↓
+[parser determinista]   ← src/rag/query_parser.py (sin red, sin modelo, sin costo)
+        ↓  {doc_type, sexo, edad_min/max, enfermedad, riesgo}
+base vectorial: búsqueda por similitud CON el filtro aplicado
+        ↓
+Top-k resultados
+```
+
+| Restricción | Se detecta con | Ejemplo |
+|---|---|---|
+| `doc_type` | palabras clave por tipo de fuente | *"paciente"* → `patient_record`; *"ergometría"* → `diagnostic_protocol`; *"estatinas"* → `pharmacology_protocol`; *"angina"* → `clinical_guideline` |
+| `sexo` | términos de género | *"masculino / hombre / varón"* → `Masculino` |
+| `edad ≥` | expresiones numéricas | *"mayor de 60"*, *"más de 60"*, *">60"*, *"60 años o más"*, *"a partir de 60"* |
+| `edad ≤` | expresiones numéricas | *"menor de 50"*, *"50 años o menos"* |
+| `enfermedad` | positivo y negativo (los negativos van primero) | *"con enfermedad coronaria confirmada"* → `True`; *"sin enfermedad"* → `False` |
+| `riesgo` | niveles de riesgo | *"riesgo muy alto"* → `Muy Alto / Crítico` |
+
+### Propiedades de diseño
+
+| Propiedad | Detalle |
+|---|---|
+| **Determinista** | Listas de palabras clave y expresiones regulares. Sin aleatoriedad ni modelo. |
+| **Gratuito** | Cero tokens, cero API, cero cuota. La latencia añadida es ~0 ms. |
+| **Explicable** | Devuelve *qué* detectó y *por qué*, y se muestra en pantalla antes de aplicar el filtro. |
+| **Sin invenciones** | Solo se aplica lo que la consulta **escribe explícitamente**. Un rango contradictorio (`>70` y `<40`) se descarta con una nota. |
+| **Agnóstico de tildes y mayúsculas** | Se normaliza el texto (minúsculas, sin tildes, espacios colapsados). |
+| **Reversible** | `--no-auto-filter` en la CLI y una casilla en la app lo desactivan. |
+| **Los filtros manuales ganan** | Si el usuario fija una restricción en la interfaz, esa prevalece sobre la detectada. |
+
+### Dónde está disponible
+
+| Interfaz | Cómo se usa |
+|---|---|
+| **CLI** | Automático por defecto: `uv run rag ask "paciente masculino, mayor de 60 años..."` — el sistema muestra `🧠 INTERPRETÉ LA CONSULTA: …` y aplica el filtro. Se desactiva con `--no-auto-filter`. |
+| **App web** | Casilla *"🧠 Interpretar la consulta y aplicar los filtros automáticamente"* (activada por defecto), con los chips de lo detectado. |
+| **Notebook** | Celda 4.2: análisis de la consulta y comparación lado a lado con/sin filtro. |
+
+### Por qué reglas y no un LLM
+
+En un dominio clínico con vocabulario controlado, un parser determinístico es **más preciso,
+auditable y reproducible**, y no depende de la red durante la demostración. Un LLM tiene más
+sentido en el paso siguiente del proyecto: **redactar la respuesta** a partir de los fragmentos
+recuperados.
+
+---
+
+## 4. Modelo de datos (payload de cada punto)
 
 ```jsonc
 {
@@ -138,7 +207,7 @@
 
 ---
 
-## 4. Seguridad cloud
+## 5. Seguridad cloud
 
 | Medida | Implementación |
 |---|---|
@@ -150,7 +219,7 @@
 
 ---
 
-## 5. Reproducibilidad
+## 6. Reproducibilidad
 
 1. `uv sync` resuelve un entorno **determinista** a partir de `uv.lock`.
 2. `uv run rag pipeline` ejecuta los 5 pasos y escribe `output/benchmark_summary.json`.

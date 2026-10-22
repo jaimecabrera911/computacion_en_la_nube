@@ -631,7 +631,8 @@ def page_demo():
     header("🚀", "Demostración Funcional en Tiempo Real", "Búsqueda Semántica contra Qdrant Cloud")
 
     from rag.config import settings
-    from rag.vector_store import get_qdrant_client
+    from rag.query_parser import UNSET, parse_query
+    from rag.vector_store import build_metadata_filter, get_qdrant_client
     from rag.evaluation import BENCHMARK_QUERIES
     from sentence_transformers import SentenceTransformer
     from qdrant_client.http import models
@@ -674,26 +675,101 @@ def page_demo():
                                format_func=lambda k: FILTER_LABELS[k])
     with c3:
         top_k = st.slider("🔝 Top-k", 1, 10, 5)
-        ejecutar = st.button("⚡ Ejecutar búsqueda en vivo", width="stretch", type="primary")
+
+    # --- Filtros clínicos compuestos (índices de payload) ------------------------
+    with st.expander("⚙️ Filtros clínicos compuestos (índices de payload)", expanded=False):
+        st.caption(
+            "Un embedding captura **significado**, pero no puede comparar números: pedir "
+            "*'mayor de 60 años'* dentro del texto de la consulta **no** restringe la edad de los "
+            "resultados. Las restricciones estructuradas se aplican con estos filtros, que se "
+            "combinan con AND sobre los índices de payload de Qdrant."
+        )
+        f1, f2, f3, f4 = st.columns(4)
+        with f1:
+            sexo = st.selectbox("Sexo", ["(cualquiera)", "Masculino", "Femenino"], key="f_sexo")
+        with f2:
+            edad_min = st.number_input("Edad mínima", min_value=0, max_value=100, value=0, step=1, key="f_emin")
+        with f3:
+            edad_max = st.number_input("Edad máxima", min_value=0, max_value=100, value=100, step=1, key="f_emax")
+        with f4:
+            opcion_enf = st.selectbox("Enfermedad coronaria",
+                                       ["(cualquiera)", "Confirmada", "Ausente"], key="f_enf")
+        riesgo_sel = st.selectbox("Nivel de riesgo",
+                                   ["(cualquiera)", "Bajo", "Moderado", "Alto", "Muy Alto / Crítico"],
+                                   key="f_riesgo")
 
     if st.session_state.get("query_txt", "") and not query_text:
         query = st.session_state.get("query_txt", "")
     else:
         query = query_text.strip() or BATTERY.get(pref, {}).get("text", "")
-    st.caption(f"🔎 Consulta a ejecutar: «{query[:160]}» · filtro: {FILTER_LABELS.get(doctype, doctype) or 'ninguno'} · Top-k = {top_k}")
+
+    # --- Interpretación automática de la consulta --------------------------------
+    auto_filtro = st.checkbox(
+        "🧠 Interpretar la consulta y aplicar los filtros automáticamente",
+        value=True,
+        key="auto_filtro",
+        help=(
+            "Un modelo de embeddings no puede comparar números: pedir 'mayor de 60 años' en el "
+            "texto NO restringe la edad de los resultados. El parser extrae esas restricciones "
+            "del texto y las aplica como filtro sobre los índices de payload de Qdrant."
+        ),
+    )
+    parseado = parse_query(query if query else "")
+    if auto_filtro and parseado.conditions:
+        st.markdown(
+            "".join(
+                f"<span class='chip' style='background:rgba(56,217,169,.16);color:#8FFFF0'>🧠 {c}</span> "
+                for c in parseado.conditions
+            ),
+            unsafe_allow_html=True,
+        )
+
+
+    # Traduce los controles de la UI al filtro de Qdrant.
+    condiciones = []
+    if sexo != "(cualquiera)":
+        condiciones.append(f"sexo={sexo}")
+    if edad_min > 0:
+        condiciones.append(f"edad>={int(edad_min)}")
+    if edad_max < 100:
+        condiciones.append(f"edad<={int(edad_max)}")
+    if opcion_enf != "(cualquiera)":
+        condiciones.append("enfermedad=confirmada" if opcion_enf == "Confirmada" else "enfermedad=ausente")
+    if riesgo_sel != "(cualquiera)":
+        condiciones.append(f"riesgo={riesgo_sel}")
+
+    st.caption(
+        f"🔎 Consulta a ejecutar: «{query[:160]}» · filtro: {FILTER_LABELS.get(doctype, doctype) or 'ninguno'} · "
+        f"Top-k = {top_k}"
+        + (f" · **condiciones: {' · '.join(condiciones)}**" if condiciones else "")
+    )
+
+    ejecutar = st.button("⚡ Ejecutar búsqueda en vivo", width="stretch", type="primary")
 
     if ejecutar:
-        filt = doctype or None
         with st.spinner("Vectorizando consulta y consultando Qdrant Cloud..."):
             try:
                 model = load_model()
                 client = load_client()
                 t0 = time.perf_counter()
                 query_vector = model.encode(query, normalize_embeddings=True).tolist()
-                qfilter = (
-                    models.Filter(must=[models.FieldCondition(key="doc_type", match=models.MatchValue(value=filt))])
-                    if filt else None
-                )
+                # Los filtros manuales tienen prioridad sobre los detectados.
+                manual = {
+                    "doc_type": doctype or None,
+                    "sex": sexo if sexo != "(cualquiera)" else None,
+                    "min_age": int(edad_min) if edad_min > 0 else None,
+                    "max_age": int(edad_max) if edad_max < 100 else None,
+                    "disease": (
+                        (True if opcion_enf == "Confirmada" else False)
+                        if opcion_enf != "(cualquiera)"
+                        else None
+                    ),
+                    "risk": riesgo_sel if riesgo_sel != "(cualquiera)" else None,
+                }
+                if auto_filtro:
+                    qfilter = parseado.to_filter(**{k: (v if v is not None else UNSET) for k, v in manual.items()})
+                else:
+                    qfilter = build_metadata_filter(**manual)
                 response = client.query_points(
                     collection_name=settings.collection_name,
                     query=query_vector, limit=top_k, query_filter=qfilter,
@@ -707,6 +783,7 @@ def page_demo():
                     st.success(
                         f"✅ Recuperación exitosa en {elapsed_ms:,.0f} ms · {len(ppoints)} fragmentos · "
                         f"colección `{settings.collection_name}` · Top-1 score **{ppoints[0].score:.4f}**"
+                        + (f" · condiciones aplicadas: **{' · '.join(condiciones)}**" if condiciones else "")
                     )
                     for rank, point in enumerate(ppoints, 1):
                         payload = point.payload or {}

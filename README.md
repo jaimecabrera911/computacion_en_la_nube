@@ -42,6 +42,7 @@ Fuentes (dataset tabular + 3 guías clínicas)
 | **Modelo de embeddings** | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (384 dims, CPU local) |
 | **Fragmentación** | `RecursiveCharacterTextSplitter` — `chunk_size=512`, `chunk_overlap=64` |
 | **Volumen indexado** | 303 viñetas clínicas + 46 fragmentos documentales = **349 vectores** |
+| **Interpretación de la consulta** | Parser determinista que extrae restricciones estructuradas (sexo, edad, diagnóstico) del texto y las aplica como filtro de payload — porque *un embedding no puede comparar números* |
 
 > 📖 **Antes de presentar, lee [`docs/EXPLICACION_SUSTENTACION.md`](docs/EXPLICACION_SUSTENTACION.md)**:
 > es la guía paso a paso (analogías, preguntas frecuentes, glosario y guion de 4 minutos) que te
@@ -96,6 +97,8 @@ uv run rag pipeline                 # pipeline completo + métricas (output/benc
 uv run rag evaluate                 # solo el benchmark semántico
 uv run rag ask "¿cuándo está indicada la angioplastia?"   # consulta puntual
 uv run rag ask "..." -f patients -k 5                       # con filtro por tipo y Top-k
+uv run rag ask "paciente masculino, mayor de 60 años..."   # interpreta la consulta y filtra solo
+uv run rag ask "..." --no-auto-filter                      # desactiva la interpretación automática
 uv run rag chat                     # consola interactiva
 uv run rag queries                  # muestra la batería oficial de consultas
 uv run rag poster                   # regenera el póster en PDF
@@ -128,6 +131,7 @@ uv run pytest                                   # pruebas automáticas del pipel
 ├── src/rag/                             # el código del sistema
 │   ├── config.py · dataset_loader.py · document_processor.py
 │   ├── vector_store.py · evaluation.py · pipeline.py · cli.py
+│   ├── query_parser.py                  # interpretación automática de la consulta (PASO 5)
 │   └── reporting/                       # póster, diagrama, guías PDF, informe de resultados
 ├── app/app_sustentacion.py              # demo web (Streamlit)
 ├── data/documents/ · data/sources/      # corpus complementario y fuentes oficiales

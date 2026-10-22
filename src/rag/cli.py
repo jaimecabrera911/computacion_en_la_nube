@@ -22,12 +22,14 @@ import json
 import logging
 import sys
 import time
+from typing import Any
 
 from qdrant_client.http import models
 
 from rag.config import settings
 from rag.evaluation import BENCHMARK_QUERIES, run_retrieval_benchmark, summarize_results
-from rag.vector_store import get_qdrant_client, semantic_search
+from rag.query_parser import UNSET, describe_filter_conditions, parse_query
+from rag.vector_store import build_metadata_filter, get_qdrant_client, semantic_search
 
 logger = logging.getLogger(__name__)
 
@@ -57,46 +59,22 @@ def _build_filter(
     disease: str | None = None,
     risk: str | None = None,
 ) -> models.Filter | None:
-    """
-    Construye el filtro de metadatos combinando las condiciones solicitadas.
-
-    Todas las condiciones se aplican con AND sobre los índices de payload de
-    Qdrant, de modo que el filtro y la búsqueda vectorial se resuelven en la
-    misma pasada del índice HNSW.
-    """
-    condiciones: list[models.Condition] = []
-
+    """Construye el filtro de metadatos combinando las condiciones solicitadas."""
     doc_type = FILTER_CHOICES.get(filter_type)
-    if doc_type is not None:
-        condiciones.append(
-            models.FieldCondition(key="doc_type", match=models.MatchValue(value=doc_type))
-        )
-    if sex:
-        condiciones.append(
-            models.FieldCondition(key="sex", match=models.MatchValue(value=sex))
-        )
+    disease_flag: bool | None = None
     if disease in {"true", "sí", "si", "confirmada", "1"}:
-        condiciones.append(
-            models.FieldCondition(key="disease_present", match=models.MatchValue(value=True))
-        )
+        disease_flag = True
     elif disease in {"false", "no", "0"}:
-        condiciones.append(
-            models.FieldCondition(key="disease_present", match=models.MatchValue(value=False))
-        )
-    if min_age is not None or max_age is not None:
-        rango = models.Range(
-            gte=min_age if min_age is not None else None,
-            lte=max_age if max_age is not None else None,
-        )
-        condiciones.append(models.FieldCondition(key="age", range=rango))
-    if risk:
-        condiciones.append(
-            models.FieldCondition(key="risk_level", match=models.MatchValue(value=risk))
-        )
+        disease_flag = False
 
-    if not condiciones:
-        return None
-    return models.Filter(must=condiciones)
+    return build_metadata_filter(
+        doc_type,
+        sex=sex,
+        min_age=min_age,
+        max_age=max_age,
+        disease=disease_flag,
+        risk=risk,
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -175,14 +153,45 @@ def cmd_ask(args: argparse.Namespace) -> int:
 
     client = get_qdrant_client()
     model = load_embedding_model()
-    query_filter = _build_filter(
-        args.filter,
-        sex=args.sex,
-        min_age=args.min_age,
-        max_age=args.max_age,
-        disease=args.disease,
-        risk=args.risk,
-    )
+
+    # Interpretación automática de la consulta: un embedding no puede comparar
+    # números, así que las restricciones estructuradas se extraen del texto y
+    # se aplican como filtro de payload.
+    parseado = parse_query(args.query)
+    usar_auto = not args.no_auto_filter
+
+    # Los filtros manuales tienen PRIORIDAD sobre los detectados.
+    manual_doc_type = FILTER_CHOICES.get(args.filter) if args.filter != "all" else UNSET
+    manual_sex = args.sex if args.sex else UNSET
+    manual_min_age = args.min_age if args.min_age is not None else UNSET
+    manual_max_age = args.max_age if args.max_age is not None else UNSET
+    manual_disease: Any = UNSET
+    if args.disease in {"true", "sí", "si", "confirmada", "1"}:
+        manual_disease = True
+    elif args.disease in {"false", "no", "0"}:
+        manual_disease = False
+    manual_risk = args.risk if args.risk else UNSET
+
+    if usar_auto:
+        query_filter = parseado.to_filter(
+            doc_type=manual_doc_type,
+            sex=manual_sex,
+            min_age=manual_min_age,
+            max_age=manual_max_age,
+            disease=manual_disease,
+            risk=manual_risk,
+        )
+    else:
+        query_filter = _build_filter(
+            args.filter,
+            sex=args.sex,
+            min_age=args.min_age,
+            max_age=args.max_age,
+            disease=args.disease,
+            risk=args.risk,
+        )
+
+    condiciones_finales = describe_filter_conditions(query_filter) if query_filter else "sin filtro"
 
     t0 = time.perf_counter()
     results = semantic_search(
@@ -197,20 +206,13 @@ def cmd_ask(args: argparse.Namespace) -> int:
 
     print("\n" + "=" * 78)
     print(f"CONSULTA: {args.query}")
-    print(f"FILTRO  : {FILTER_LABELS.get(args.filter, args.filter)}")
-    if query_filter is not None and (args.sex or args.min_age or args.disease or args.risk or args.max_age):
-        partes = []
-        if args.sex:
-            partes.append(f"sexo={args.sex}")
-        if args.min_age is not None:
-            partes.append(f"edad>={args.min_age}")
-        if args.max_age is not None:
-            partes.append(f"edad<={args.max_age}")
-        if args.disease:
-            partes.append(f"enfermedad={args.disease}")
-        if args.risk:
-            partes.append(f"riesgo={args.risk}")
-        print(f"CONDICIONES: {' · '.join(partes)}")
+    if usar_auto and parseado.conditions:
+        print(f"🧠 INTERPRETÉ LA CONSULTA: {' · '.join(parseado.conditions)}")
+    elif usar_auto:
+        print("🧠 INTERPRETÉ LA CONSULTA: sin restricciones detectables")
+    else:
+        print("🧠 Interpretación automática: DESACTIVADA (--no-auto-filter)")
+    print(f"FILTRO APLICADO: {condiciones_finales}")
     print("=" * 78)
     if not results:
         print("No se encontraron resultados con ese filtro.")
@@ -388,6 +390,11 @@ def build_parser() -> argparse.ArgumentParser:
         "-b",
         action="store_true",
         help="Salida compacta en tabla (ideal para demos en video).",
+    )
+    p.add_argument(
+        "--no-auto-filter",
+        action="store_true",
+        help="Desactiva la interpretación automática de la consulta (no se extraen filtros del texto).",
     )
     p.set_defaults(func=cmd_ask)
 

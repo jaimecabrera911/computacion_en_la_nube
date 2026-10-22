@@ -66,6 +66,7 @@ propio no estructurado de **3 documentos** (Markdown + PDF) en `data/documents/`
 | Retorno consistente de los Top-k fragmentos más afines | `notebooks/…ipynb` §4.1-4.2 | Cada consulta muestra su Top-5 con score y metadatos. |
 | Análisis cuantitativo de las puntuaciones de similitud coseno | `docs/RESULTADOS.md` · `output/similarity_distribution.png` · `output/metricas_similitud_notebook.png` | Media, mín, máx, desviación por consulta y degradación por rango. |
 | Uso de filtros de metadatos | `src/rag/evaluation.py` | Q4 combina `doc_type` + `sex` + `disease_present` + `age ≥ 60`. |
+| Interpretación automática de la consulta | `src/rag/query_parser.py` (celda 4.2 del notebook) | El sistema extrae las restricciones del texto y las aplica como filtro de payload: determinista, sin costo y sin red. Es un refinamiento *dentro* del PASO 5, no un paso adicional. |
 | Medición de latencia | `src/rag/pipeline.py::measure_latency` | Latencia media de búsqueda remota y coste de vectorización local, con calentamiento de conexión. |
 
 ---

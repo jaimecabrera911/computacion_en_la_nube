@@ -110,6 +110,61 @@ def index_corpus_in_batches(
     logger.info(f"Indexación completada: {total_items} vectores insertados en Qdrant.")
     return total_items
 
+def build_metadata_filter(
+    doc_type: str | None = None,
+    *,
+    sex: str | None = None,
+    min_age: int | None = None,
+    max_age: int | None = None,
+    disease: bool | None = None,
+    risk: str | None = None,
+) -> Optional[models.Filter]:
+    """
+    Construye un filtro de metadatos combinando las condiciones solicitadas.
+
+    Todas las condiciones se aplican con AND sobre los índices de payload de
+    Qdrant, de modo que el filtro y la búsqueda vectorial se resuelven en la
+    misma pasada del índice HNSW, sin recorrer el corpus completo.
+
+    Es la forma correcta de expresar restricciones estructuradas (edad, sexo,
+    diagnóstico). Un embedding captura significado, pero no puede comparar
+    números: pedir "mayor de 60 años" dentro del texto de la consulta NO
+    restringe el rango de edad de los resultados.
+    """
+    condiciones: list[models.Condition] = []
+
+    if doc_type:
+        condiciones.append(
+            models.FieldCondition(key="doc_type", match=models.MatchValue(value=doc_type))
+        )
+    if sex:
+        condiciones.append(
+            models.FieldCondition(key="sex", match=models.MatchValue(value=sex))
+        )
+    if disease is not None:
+        condiciones.append(
+            models.FieldCondition(key="disease_present", match=models.MatchValue(value=disease))
+        )
+    if min_age is not None or max_age is not None:
+        condiciones.append(
+            models.FieldCondition(
+                key="age",
+                range=models.Range(
+                    gte=min_age if min_age is not None else None,
+                    lte=max_age if max_age is not None else None,
+                ),
+            )
+        )
+    if risk:
+        condiciones.append(
+            models.FieldCondition(key="risk_level", match=models.MatchValue(value=risk))
+        )
+
+    if not condiciones:
+        return None
+    return models.Filter(must=condiciones)
+
+
 def semantic_search(
     client: QdrantClient,
     model: SentenceTransformer,
