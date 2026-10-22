@@ -1,11 +1,21 @@
+# Entorno virtual y herramientas de uv
 .venv/
 __pycache__/
 *.pyc
-.env
-.ipynb_checkpoints/
 .pytest_cache/
 *.egg-info/
 dist/
 build/
-qdrant_storage/
+
+# Credenciales del clúster vectorial — NUNCA subir al repositorio
+.env
+
+# Artefactos temporales de herramientas
+.ipynb_checkpoints/
+.commandcode/
+.virtual_documents/
 .cache/
+qdrant_storage/
+
+# Archivos temporales generados por los informes
+output/_tmp_*

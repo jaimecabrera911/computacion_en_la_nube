@@ -4,6 +4,8 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 
+from rag.config import settings
+
 def markdown_to_pdf(md_path, pdf_path):
     with open(md_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
@@ -126,9 +128,20 @@ def markdown_to_pdf(md_path, pdf_path):
     doc.build(story)
     print(f"Generated PDF: {pdf_path}")
 
+
+def generate_corpus_pdfs(documents_dir: str | None = None) -> list[str]:
+    """Convierte cada documento Markdown del corpus en su versión PDF."""
+    documents_dir = documents_dir or str(settings.documents_dir)
+    generated = []
+    for fname in sorted(os.listdir(documents_dir)):
+        if not fname.endswith(".md"):
+            continue
+        pdf_name = fname.replace(".md", ".pdf")
+        pdf_path = os.path.join(documents_dir, pdf_name)
+        markdown_to_pdf(os.path.join(documents_dir, fname), pdf_path)
+        generated.append(pdf_path)
+    return generated
+
+
 if __name__ == "__main__":
-    docs_dir = "data/documents"
-    for fname in os.listdir(docs_dir):
-        if fname.endswith(".md"):
-            pdf_name = fname.replace(".md", ".pdf")
-            markdown_to_pdf(os.path.join(docs_dir, fname), os.path.join(docs_dir, pdf_name))
+    generate_corpus_pdfs()

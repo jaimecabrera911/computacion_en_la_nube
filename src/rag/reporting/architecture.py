@@ -1,7 +1,15 @@
+import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-def generate_architecture_diagram(output_path: str = "output/cloud_rag_architecture.png"):
+from rag.config import settings
+
+
+def generate_architecture_diagram(output_path: str | None = None):
+    """Genera el diagrama de arquitectura cloud (PNG, 300 dpi)."""
+    output_path = output_path or str(settings.output_dir / "cloud_rag_architecture.png")
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+
     fig, ax = plt.subplots(figsize=(12, 6.5), dpi=300)
     ax.set_xlim(0, 100)
     ax.set_ylim(0, 100)

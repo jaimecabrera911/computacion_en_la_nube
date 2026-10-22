@@ -1,155 +1,187 @@
-# 🩺 Sistema RAG Cloud Serverless en Salud con Qdrant y Embeddings Abiertos
-### Proyecto ACA N° 1 - Asignatura: Computación en la Nube
-**Especialización en Inteligencia Artificial**  
-**Corporación Unificada Nacional de Educación Superior (CUN)**  
-**Docente:** Hamilton Rivera Flor  
-**Estudiante:** Jaime Cabrera  
+# 🩺 Sistema RAG Cloud Serverless en Salud — ACA N° 1 Computación en la Nube
+
+**Corporación Unificada Nacional de Educación Superior (CUN)** ·
+Especialización en Inteligencia Artificial · Escuela de Ingeniería
+**Docente:** Hamilton Rivera Flor · **Estudiante:** Jaime Cabrera
 
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
-[![Package Manager](https://img.shields.io/badge/Package_Manager-uv-blueviolet.svg)](https://docs.astral.sh/uv/)
-[![Vector DB](https://img.shields.io/badge/Vector_DB-Qdrant_Cloud-red.svg)](https://qdrant.tech/)
-[![Embeddings](https://img.shields.io/badge/Model-paraphrase--multilingual--MiniLM--L12--v2-green.svg)](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)
+[![uv](https://img.shields.io/badge/uv-Astral-blueviolet.svg)](https://docs.astral.sh/uv/)
+[![Qdrant](https://img.shields.io/badge/Qdrant_Cloud-Serverless-red.svg)](https://qdrant.tech/)
+[![Embeddings](https://img.shields.io/badge/Embeddings-SBERT_multilingue-green.svg)](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)
 
 ---
 
-## 📌 1. Descripción del Proyecto y Pregunta Orientadora
+## 1. ¿Qué es este proyecto?
 
-Este proyecto implementa una arquitectura cloud serverless de ingesta, fragmentación (*chunking*), vectorización e indexación semántica en **Qdrant Cloud**, dando respuesta a la pregunta orientadora del ACA N° 1:
-
-> *¿Cómo estructurar e implementar una canalización (pipeline) de datos no estructurados en la nube mediante bases de datos vectoriales serverless y modelos de embeddings abiertos, que permita indexar y recuperar semánticamente información contextual especializada con alta precisión, costo cero y baja latencia?*
-
-### Pilar Seleccionado: Salud 🩺 (Cardiología Preventiva y Diagnóstica)
-- **Dataset Base Estructurado:** UCI Heart Disease (ID: 45) descargado programáticamente con `ucimlrepo`, transformando 303 historias clínicas tabulares en narrativas clínicas estructuradas enriquecidas con metadatos contextuales y niveles de riesgo.
-- **Corpus Complementario No Estructurado (Obligatorio):** 3 documentos clínicos normativos y de práctica médica en formato Markdown y PDF:
-  1. `DOC_01`: *Guía de Práctica Clínica para el Diagnóstico y Estratificación de la Enfermedad Coronaria* (MinSalud / OPS / OMS).
-  2. `DOC_02`: *Protocolo Clínico de Pruebas de Esfuerzo, Ergometría y Angiografía Coronaria* (ACC / AHA).
-  3. `DOC_03`: *Protocolo Clínico de Manejo Farmacológico y Prevención Cardiovascular Secundaria* (ESC / OMS).
-
----
-
-## 🏛️ 2. Arquitectura Cloud del Sistema
+Implementa la **canalización (pipeline) completa de un sistema RAG en la nube** para el sector
+**salud**, abiding the rúbrica del ACA N° 1:
 
 ```
-+-----------------------------------------------------------------------------------+
-|                            FUENTES DE INFORMACIÓN CLÍNICA                        |
-|   +------------------------------------+   +----------------------------------+   |
-|   |   UCI Heart Disease Dataset        |   |   3 Guías Clínicas (PDF / MD)    |   |
-|   |   (303 pacientes, 14 variables)    |   |   MinSalud, ACC/AHA, ESC/OMS     |   |
-|   +-----------------+------------------+   +----------------+-----------------+   |
-+---------------------|---------------------------------------|---------------------+
-                      v                                       v
-+-----------------------------------------------------------------------------------+
-|                     CAPA DE PROCESAMIENTO Y CHUNKING (LangChain)                  |
-|   • Conversión Tabular -> Viñeta Clínica   • RecursiveCharacterTextSplitter       |
-|   • Metadatos enriquecidos (edad, sexo,    • chunk_size = 512 caracteres          |
-|     cp, oldpeak, target, risk_level)       • chunk_overlap = 64 (~12%)            |
-|   =============================================================================   |
-|                    Corpus Consolidado: 349 Fragmentos Vectoriales                 |
-+-----------------------------------------------------------------------------------+
-                                      |
-                                      v
-+-----------------------------------------------------------------------------------+
-|        VECTORIZACIÓN: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2        |
-|   • Espacio latente denso de 384 dimensiones                                      |
-|   • Normalización L2 (Dot Product = Cosine Similarity)                            |
-|   • Inserción por lotes (Batch Upsert, batch_size = 64)                           |
-+-----------------------------------------------------------------------------------+
-                                      |
-                                      v
-+-----------------------------------------------------------------------------------+
-|                         ALMACÉN VECTORIAL SERVERLESS                              |
-|                    QDRANT CLOUD (AWS Región ca-central-1)                         |
-|   • Colección: clinical_heart_disease_rag                                         |
-|   • Métrica de distancia: Distance.COSINE                                         |
-|   • Índices de Payload nativos: doc_type, sex, disease_present, risk_level        |
-|   • Latencia de recuperación: < 150 ms | Costo: $0.00 USD (Free Tier 1GB)         |
-+-----------------------------------------------------------------------------------+
-                                      |
-                                      v
-+-----------------------------------------------------------------------------------+
-|                        BÚSQUEDA SEMÁNTICA Y RECUPERACIÓN RAG                      |
-|   • Consultas en Lenguaje Natural con Ranking Top-k (k=3, 5)                      |
-|   • Filtrado de Metadatos en tiempo real sin penalizar latencia                   |
-|   • Similitud Coseno Media > 0.65 (Pico de 0.7964 en consultas farmacológicas)   |
-+-----------------------------------------------------------------------------------+
+Fuentes (dataset tabular + 3 guías clínicas)
+   → ingesta y narrativización
+   → fragmentación (chunking)
+   → embeddings (SBERT multilingüe, 384 dims)
+   → indexación vectorial en Qdrant Cloud (serverless)
+   → búsqueda semántica Top-k con filtros de metadatos
 ```
 
+**Pregunta orientadora que responde el proyecto:**
+
+> *¿Cómo estructurar e implementar una canalización de datos no estructurados en la nube mediante
+> bases de datos vectoriales serverless y modelos de embeddings abiertos, que permita indexar y
+> recuperar semánticamente información contextual especializada con alta precisión, costo cero y
+> baja latencia?*
+
+### Pilar seleccionado: Salud 🩺 (cardiopatía isquémica)
+
+| Componente | Detalle |
+|---|---|
+| **Dataset base (estructurado)** | UCI Heart Disease (ID 45) — 303 pacientes, 14 variables clínicas, descargado con `ucimlrepo` |
+| **Corpus complementario (obligatorio, no estructurado)** | 3 guías clínicas en `data/documents/`: MinSalud-OPS-OMS, ACC/AHA y ESC/OMS (Markdown + PDF) |
+| **Base de datos vectorial** | Qdrant Cloud (serverless, Free Tier 1 GB) — colección `clinical_heart_disease_rag` |
+| **Modelo de embeddings** | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (384 dims, CPU local) |
+| **Fragmentación** | `RecursiveCharacterTextSplitter` — `chunk_size=512`, `chunk_overlap=64` |
+| **Volumen indexado** | 303 viñetas clínicas + 46 fragmentos documentales = **349 vectores** |
+
+> 📖 **Antes de presentar, lee [`docs/EXPLICACION_SUSTENTACION.md`](docs/EXPLICACION_SUSTENTACION.md)**:
+> es la guía paso a paso (analogías, preguntas frecuentes, glosario y guion de 4 minutos) que te
+> permite explicar el proyecto sin improvisar.
+
 ---
 
-## 📦 3. Entregables Oficiales (Cumplimiento Rúbricas 10/10)
+## 2. Documentación del proyecto (léela en este orden)
 
-| Entregable | Archivo en el Repositorio | Descripción |
-|---|---|---|
-| **1. Notebook Reproducible** | `heart_disease_rag_qdrant.ipynb` (y en `notebooks/`) | Cuaderno Jupyter completamente documentado y ejecutado secuencialmente de principio a fin, con outputs y gráficas generadas. |
-| **2. Póster Infografía** | `Poster_Infografia_ACA1_RAG_Salud.pdf` | Infografía técnica en PDF de alta resolución con diagrama de arquitectura, tablas de stack, métricas y normas APA 7. |
-| **3. Guion de Sustentación** | `GUION_SUSTENTACION_VIDEO.md` | Guion estructurado minuto a minuto (3 a 5 min) para la grabación de la sustentación en video. |
-| **4. Documentos Complementarios** | `data/documents/` | Las 3 guías clínicas en formato Markdown y PDF autogeneradas. |
-| **5. Diagrama y Métricas** | `output/` | Gráficas de distribución de similitud coseno y diagrama de arquitectura cloud. |
+| Documento | Para qué sirve |
+|---|---|
+| [`docs/EXPLICACION_SUSTENTACION.md`](docs/EXPLICACION_SUSTENTACION.md) | **Cómo explicar el proyecto**: analogía de la biblioteca, decisiones técnicas y por qué, preguntas frecuentes, glosario, guion de sustentación. |
+| [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Diagrama de las 5 capas, modelo de datos (payload), decisiones de diseño y medidas de seguridad. |
+| [`docs/RESULTADOS.md`](docs/RESULTADOS.md) | Métricas **medidas** del benchmark (se regenera solo: `uv run rag report`). |
+| [`docs/RUBRICA_CHECKLIST.md`](docs/RUBRICA_CHECKLIST.md) | Mapa de cada criterio de la rúbrica → archivo que lo evidencia, con los pendientes marcados. |
+| [`GUION_SUSTENTACION_VIDEO.md`](GUION_SUSTENTACION_VIDEO.md) | Guion literal minuto a minuto del video de 3-5 minutos. |
 
 ---
 
-## 🚀 4. Instalación y Ejecución Rápida con `uv`
+## 3. Entregables oficiales
 
-Este proyecto utiliza **`uv`**, el gestor de paquetes de última generación para Python.
+| # | Entregable | Archivo | Estado |
+|---|---|---|---|
+| 1 | **Notebook técnico reproducible** | [`notebooks/heart_disease_rag_qdrant.ipynb`](notebooks/heart_disease_rag_qdrant.ipynb) | 22 celdas, ejecutado de principio a fin con outputs reales |
+| 2 | **Póster tipo infografía (PDF)** | [`output/Poster_Infografia_ACA1_RAG_Salud.pdf`](output/Poster_Infografia_ACA1_RAG_Salud.pdf) | 2 páginas A4, diagramado, con métricas medidas y APA 7 |
+| 3 | **Video de sustentación (3-5 min)** | Guion en [`GUION_SUSTENTACION_VIDEO.md`](GUION_SUSTENTACION_VIDEO.md) + demo en [`app/app_sustentacion.py`](app/app_sustentacion.py) | Guion cronometrado (4:15); falta grabar y subir el video |
+| 4 | **Documentos complementarios** | [`data/documents/`](data/documents/) | 3 guías clínicas en Markdown y PDF |
+| 5 | **Diagrama y métricas** | [`output/`](output/) | Diagrama de arquitectura, gráficas de similitud y resumen JSON |
 
-### 4.1 Clonar el repositorio y configurar el entorno
+---
+
+## 4. Instalación y ejecución
+
 ```bash
-git clone https://github.com/jaimeacabreraa/computacion_en_la_nube.git
-cd computacion_en_la_nube
-
-# Sincronizar entorno virtual con uv
+# 1. Instalar el entorno (Python 3.12 + dependencias resueltas por uv)
 uv sync
+
+# 2. Configurar las credenciales del clúster
+cp .env.example .env      # y pegar QDRANT_URL y QDRANT_API_KEY de https://cloud.qdrant.io
+
+# 3. Ejecutar el pipeline completo (PASO 1 → 5) y guardar las métricas
+uv run rag pipeline
 ```
 
-### 4.2 Configuración Segura de Variables de Entorno (`.env`)
-Copie la plantilla de variables de entorno y configure sus credenciales de **Qdrant Cloud**:
+Sin credenciales, el pipeline arranca en **modo local in-memory** y se puede demostrar igual.
+
+### Comandos disponibles
+
 ```bash
-cp .env.example .env
+uv run rag pipeline                 # pipeline completo + métricas (output/benchmark_summary.json)
+uv run rag evaluate                 # solo el benchmark semántico
+uv run rag ask "¿cuándo está indicada la angioplastia?"   # consulta puntual
+uv run rag ask "..." -f patients -k 5                       # con filtro por tipo y Top-k
+uv run rag chat                     # consola interactiva
+uv run rag queries                  # muestra la batería oficial de consultas
+uv run rag poster                   # regenera el póster en PDF
+uv run rag summary-pdf              # regenera la guía fácil de resultados
+uv run rag diagram                  # regenera el diagrama de arquitectura
+uv run rag corpus-pdf               # regenera los PDF del corpus documental
+uv run rag report                   # regenera docs/RESULTADOS.md
+uv run rag notebook                 # reejecuta el notebook y guarda sus outputs
+uv run rag notebook-report          # genera el informe del notebook en PDF y HTML
 ```
-Edite `.env`:
-```ini
-QDRANT_URL=https://8a0b268f-5608-433c-9a03-bd47a0b901ca.ca-central-1-0.aws.cloud.qdrant.io
-QDRANT_API_KEY=su_qdrant_api_key_aqui
-QDRANT_COLLECTION_NAME=clinical_heart_disease_rag
-EMBEDDING_MODEL_NAME=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
-```
-> *Nota de seguridad:* Las API keys nunca se hardcodean en el código ni en los notebooks públicos, cumpliendo las directrices de seguridad del curso.
 
-### 4.3 Ejecutar el Pipeline Completo
+También con `make`: `make setup · make pipeline · make evaluate · make ask "..." · make test · make poster · make demo`.
+
+### Other entry points
+
 ```bash
-# Ejecutar verificación de extremo a extremo contra Qdrant Cloud
-uv run python src/test_pipeline.py
+uv run streamlit run app/app_sustentacion.py   # demo web para la defensa (Streamlit)
+uv run jupyter lab                              # abrir el notebook
+uv run pytest                                   # pruebas automáticas del pipeline
+```
 
-# Generar el Póster tipo Infografía en PDF
-uv run python src/generate_poster_pdf.py
+### Estructura del repositorio
 
-# Iniciar Jupyter Notebook
-uv run jupyter lab
+```
+.
+├── README.md · Makefile · pyproject.toml
+├── ACA_1_Computacion_Nube_RAG.pdf      # enunciado oficial
+├── docs/                                # documentación (leer §2)
+├── notebooks/heart_disease_rag_qdrant.ipynb
+├── src/rag/                             # el código del sistema
+│   ├── config.py · dataset_loader.py · document_processor.py
+│   ├── vector_store.py · evaluation.py · pipeline.py · cli.py
+│   └── reporting/                       # póster, diagrama, guías PDF, informe de resultados
+├── app/app_sustentacion.py              # demo web (Streamlit)
+├── data/documents/ · data/sources/      # corpus complementario y fuentes oficiales
+├── output/                              # artefactos generados (imágenes, PDFs, métricas)
+├── scripts/execute_notebook.py          # reejecución del notebook
+└── tests/                               # pruebas automáticas
 ```
 
 ---
 
-## 📊 5. Resultados de Validación de Búsqueda Semántica
+## 5. Resultados medidos
 
-Se ejecutó una batería de 5 consultas clínicas representativas contra el clúster de Qdrant Cloud:
+Ejecutados contra el clúster real de Qdrant Cloud (ver [`docs/RESULTADOS.md`](docs/RESULTADOS.md)
+para el detalle completo y reproducible con `uv run rag report`).
 
-| Query ID | Enfoque de Consulta | Filtro Qdrant | Top-1 Score | Resultado Clínico Relevante |
+| ID | Consulta | Filtro | Top-1 | Fuente recuperada |
 |---|---|---|---|---|
-| **Q1** | Criterios clínicos de angina típica y riesgo | `doc_type: 'clinical_guideline'` | **0.5901** | Protocolo MinSalud de Angina Tipo 1 e indicación de ergometría. |
-| **Q2** | Depresión ST > 2 mm y pendiente descendente | `doc_type: 'diagnostic_protocol'` | **0.5791** | Criterio ACC/AHA de isquemia severa multivaso (Slope 3). |
-| **Q3** | Metas de c-LDL con estatinas y DAPT | `doc_type: 'pharmacology_protocol'` | **0.7013** | Metas ESC/OMS (<55 mg/dL) y esquema AAS + Ticagrelor por 12 meses. |
-| **Q4** | Paciente masculino >60 años alto riesgo | `doc_type: 'patient_record'` + filtros | **0.6611** | Paciente #299 (68 años, HTA 144 mmHg, 1 vaso calcificado, riesgo alto). |
-| **Q5** | Defecto de perfusión reversible SPECT | Sin filtro (Cross-modal) | **0.6287** | Correlación entre hallazgo gammagráfico e indicación de cateterismo. |
+| Q1 | Criterios de angina típica y estratificación | `doc_type: clinical_guideline` | **0.6154** | Guía MinSalud/OPS/OMS |
+| Q2 | Depresión del ST > 2 mm con pendiente descendente | `doc_type: diagnostic_protocol` | **0.5733** | Protocolo ACC/AHA |
+| Q3 | Metas de c-LDL con estatinas y DAPT | `doc_type: pharmacology_protocol` | **0.5764** | Protocolo ESC/OMS |
+| Q4 | Paciente masculino > 60 años con cardiopatía | `doc_type` + `sex` + `disease_present` + `age ≥ 60` | **0.7014** | Historia clínica (UCI) |
+| Q5 | Isquemia inducible (SPECT) y revascularización | sin filtro (cross-modal) | **0.5676** | Protocolo ACC/AHA |
+
+| Métrica | Valor |
+|---|---|
+| Similitud coseno media (Top-1) | **0.6068** |
+| Similitud coseno máxima (Top-1) | 0.7014 |
+| Degradación por rango (1 → 5) | 0.6068 → 0.5603 → 0.5446 → 0.5235 → 0.4955 (monótona ✅) |
+| Latencia de búsqueda remota | **~120 ms** (mediana; depende del enlace de red a la región AWS) |
+| Vectorización local (SBERT en CPU) | ~15 ms |
+| Costo total de la infraestructura | **$0.00 USD** |
+
+> Las cifras de este README, del póster, de la guía de resultados, de la app de sustentación y del
+> notebook provienen **todas del mismo archivo** (`output/benchmark_summary.json`), que genera el
+> propio pipeline. No hay números escritos a mano.
 
 ---
 
-## 📚 6. Referencias Bibliográficas (Normas APA 7)
+## 6. Seguridad de las credenciales
 
-- American College of Cardiology & American Heart Association. (2024). *Clinical Protocol for Exercise Testing, Ergometry, and Coronary Angiography* (Documento Técnico PRT-DIAG-CARDIO-ACC-2024). ACC/AHA.
-- Chase, H. (2022). *LangChain: Building applications with LLMs through composability and data augmented generation.* https://github.com/langchain-ai/langchain
-- European Society of Cardiology & World Health Organization. (2024). *Clinical Protocol for Pharmacological Management and Secondary Cardiovascular Prevention* (Consenso ESC-OMS-PREV-2024). ESC/WHO.
-- Janosi, A., Steinbrunn, R., Pfisterer, M., & Detrano, R. (1988). *UCI Heart Disease Dataset* [Conjunto de datos]. UCI Machine Learning Repository. https://archive.ics.uci.edu/dataset/45/heart+disease
-- Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., Küttler, H., Lewis, M., Yih, W., Rocktäschel, T., Riedel, S., & Kiela, D. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. *Advances in Neural Information Processing Systems*, 33, 9459–9474. https://arxiv.org/abs/2005.11401
-- Ministerio de Salud y Protección Social & OPS. (2024). *Guía de Práctica Clínica: Diagnóstico y Estratificación del Riesgo en Enfermedad Arterial Coronaria* (GPC-CARDIO-2024-V2). MinSalud/OPS.
-- Qdrant Solutions GmbH. (2024). *Qdrant Documentation: Vector Search Engine & Cloud Database.* https://qdrant.tech/documentation/
-- Reimers, N., & Gurevych, I. (2019). Sentence-BERT: Sentence embeddings using Siamese BERT-networks. *Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing (EMNLP)*. https://arxiv.org/abs/1908.10084
+* Las claves se leen **exclusivamente** del archivo `.env` mediante `python-dotenv`.
+* `.env` está en `.gitignore`; `.env.example` es la plantilla que se comparte.
+* En el notebook y en la app, la clave se muestra como `[REDACTED]` y la URL del clúster se
+  redacta parcialmente.
+* Sin credenciales, el sistema opera en modo local in-memory: ningún dato sale del equipo.
+
+---
+
+## 7. Referencias bibliográficas (APA 7)
+
+* American College of Cardiology, & American Heart Association. (2024). *Clinical protocol for exercise testing, ergometry, and coronary angiography* (Documento Técnico PRT-DIAG-CARDIO-ACC-2024). ACC/AHA.
+* Chase, H. (2022). *LangChain: Building applications with LLMs through composability and data augmented generation.* https://github.com/langchain-ai/langchain
+* European Society of Cardiology, & World Health Organization. (2024). *Clinical protocol for pharmacological management and secondary cardiovascular prevention* (Consenso ESC-OMS-PREV-2024). ESC/WHO.
+* Janosi, A., Steinbrunn, R., Pfisterer, M., & Detrano, R. (1988). *UCI Heart Disease Dataset* [Conjunto de datos]. UCI Machine Learning Repository. https://archive.ics.uci.edu/dataset/45/heart+disease
+* Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., Küttler, H., Lewis, M., Yih, W., Rocktäschel, T., Riedel, S., & Kiela, D. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. *Advances in Neural Information Processing Systems*, 33, 9459–9474. https://arxiv.org/abs/2005.11401
+* Ministerio de Salud y Protección Social, & Organización Panamericana de la Salud. (2024). *Guía de práctica clínica: Diagnóstico y estratificación del riesgo en enfermedad arterial coronaria* (GPC-CARDIO-2024-V2). MinSalud/OPS.
+* Qdrant Solutions GmbH. (2024). *Qdrant documentation: Vector search engine & cloud database.* https://qdrant.tech/documentation/
+* Reimers, N., & Gurevych, I. (2019). Sentence-BERT: Sentence embeddings using Siamese BERT-networks. *Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing (EMNLP)*. https://arxiv.org/abs/1908.10084

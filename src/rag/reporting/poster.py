@@ -1,12 +1,51 @@
 import os
 from reportlab.lib.pagesizes import A4
+
+from rag.config import settings
+from rag.evaluation import load_summary
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, HRFlowable, PageBreak
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 
-def generate_poster_pdf(output_path: str = "Poster_Infografia_ACA1_RAG_Salud.pdf"):
+def _plain_text(fragment: str, limit: int = 260) -> str:
+    """Convierte un fragmento Markdown en texto plano legible para el póster."""
+    texto = fragment.replace("**", "").replace("`", "")
+    texto = texto.replace("\\ge", ">=").replace("\\le", "<=").replace("\\times", "x")
+    texto = texto.replace("###", "").replace("##", "").replace("#", "")
+    texto = " ".join(texto.split())
+    return texto[:limit]
+
+
+def _chunk_counts_by_document() -> dict[str, int]:
+    """Número real de fragmentos generados por cada documento complementario."""
+    try:
+        from rag.document_processor import chunk_unstructured_documents, load_unstructured_documents
+
+        chunks = chunk_unstructured_documents(load_unstructured_documents(str(settings.documents_dir)))
+        counts: dict[str, int] = {}
+        for chunk in chunks:
+            name = chunk["metadata"]["filename"]
+            counts[name] = counts.get(name, 0) + 1
+        return counts
+    except Exception:  # pragma: no cover - el póster no debe fallar por esto
+        return {}
+
+
+def generate_poster_pdf(output_path: str | None = None):
+    """Genera el póster tipo infografía (PDF A4, 2 páginas) con los datos medidos."""
+    output_path = output_path or str(settings.output_dir / "Poster_Infografia_ACA1_RAG_Salud.pdf")
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+
+    # Métricas reales de la última ejecución del benchmark (fuente única de verdad).
+    summary = load_summary() or {}
+    measured = {q["id"]: q for q in summary.get("queries", [])}
+    max_score = summary.get("top1_max")
+
+    # Conteo real de fragmentos por documento complementario.
+    chunk_counts = _chunk_counts_by_document()
+
     # Configuración de página A4 con márgenes optimizados
     doc = SimpleDocTemplate(
         output_path,
@@ -199,19 +238,19 @@ def generate_poster_pdf(output_path: str = "Poster_Infografia_ACA1_RAG_Salud.pdf
         [
             Paragraph("<b>Guía Clínica 01</b>", table_cell),
             Paragraph("MinSalud / OPS / OMS<br/>GPC-CARDIO-2024", table_cell),
-            Paragraph("Markdown & PDF<br/>(16 chunks)", table_cell),
+            Paragraph("Markdown & PDF<br/>(%d chunks)" % chunk_counts.get("DOC_01_Guia_Clinica_Enfermedad_Coronaria_MinSalud_OMS.md", 16), table_cell),
             Paragraph("Clasificación semiológica de dolor torácico (angina típica, atípica, no anginosa), factores de riesgo y ECG basal.", table_cell)
         ],
         [
             Paragraph("<b>Protocolo 02</b>", table_cell),
             Paragraph("ACC / AHA Guidelines<br/>PRT-DIAG-CARDIO", table_cell),
-            Paragraph("Markdown & PDF<br/>(16 chunks)", table_cell),
+            Paragraph("Markdown & PDF<br/>(%d chunks)" % chunk_counts.get("DOC_02_Protocolo_Pruebas_Esfuerzo_Ergometria_ACC_AHA.md", 16), table_cell),
             Paragraph("Criterios de ergometría, pendiente de depresión del segmento ST (slope/oldpeak), fluoroscopía (ca) y perfusión SPECT (thal).", table_cell)
         ],
         [
             Paragraph("<b>Protocolo 03</b>", table_cell),
             Paragraph("ESC / OMS Guidelines<br/>ESC-OMS-PREV", table_cell),
-            Paragraph("Markdown & PDF<br/>(14 chunks)", table_cell),
+            Paragraph("Markdown & PDF<br/>(%d chunks)" % chunk_counts.get("DOC_03_Guia_Manejo_Farmacologico_Prevencion_Secundaria.md", 14), table_cell),
             Paragraph("Metas de c-LDL (<55 mg/dL con estatinas), doble antiagregación plaquetaria (AAS + Ticagrelor) y código infarto.", table_cell)
         ]
     ]
@@ -232,7 +271,7 @@ def generate_poster_pdf(output_path: str = "Poster_Infografia_ACA1_RAG_Salud.pdf
     story.append(make_section_banner("2. Diagrama de Arquitectura Cloud RAG y Flujo de Ingesta Serverless"))
     story.append(Spacer(1, 3))
 
-    arch_img_path = "output/cloud_rag_architecture.png"
+    arch_img_path = str(settings.output_dir / "cloud_rag_architecture.png")
     if os.path.exists(arch_img_path):
         story.append(Image(arch_img_path, width=531, height=195))
     story.append(Spacer(1, 6))
@@ -264,7 +303,7 @@ def generate_poster_pdf(output_path: str = "Poster_Infografia_ACA1_RAG_Salud.pdf
             Paragraph("<b>Modelo de Embeddings</b>", table_cell),
             Paragraph("<b>paraphrase-multilingual-MiniLM-L12-v2</b>", table_cell),
             Paragraph("384 dims, normalización L2", table_cell),
-            Paragraph("Cero costo de API, alta densidad semántica, vectorización batch de 349 registros en <10 s.", table_cell)
+            Paragraph("Cero costo de API, alta densidad semántica, vectorización batch de %d vectores en pocos segundos." % summary.get("corpus", {}).get("total_vectors", 349), table_cell)
         ],
         [
             Paragraph("<b>Pipeline de Chunking</b>", table_cell),
@@ -303,50 +342,57 @@ def generate_poster_pdf(output_path: str = "Poster_Infografia_ACA1_RAG_Salud.pdf
     story.append(make_section_banner("4. Batería de Pruebas de Búsqueda Semántica con Cálculo de Similitud Coseno"))
     story.append(Spacer(1, 3))
 
+    # Las filas se construyen a partir de la última ejecución real del benchmark
+    # (output/benchmark_summary.json). Si no existe, se muestran los valores
+    # históricos de referencia para que el póster siempre sea imprimible.
+    fallback = {
+        "Q1": ("¿Cuáles son los criterios clínicos para diagnosticar angina típica y cómo se estratifica el riesgo en dolor torácico?",
+               "doc_type: 'clinical_guideline'", "0.5901",
+               "MinSalud GPC: angina típica (tipo 1) y criterios de estratificación de riesgo."),
+        "Q2": ("¿Qué implicación clínica tiene una depresión del segmento ST mayor a 2 mm y pendiente descendente en esfuerzo?",
+               "doc_type: 'diagnostic_protocol'", "0.5791",
+               "ACC/AHA: depresión ST > 2.0 mm con slope 3 (downsloping) denota isquemia severa multivaso."),
+        "Q3": ("¿Cuáles son las metas de colesterol LDL con estatinas de alta potencia y el protocolo de doble antiagregación plaquetaria?",
+               "doc_type: 'pharmacology_protocol'", "0.7013",
+               "ESC/OMS: meta c-LDL < 55 mg/dL con estatina de alta potencia y DAPT por 12 meses."),
+        "Q4": ("Paciente masculino mayor de 60 años con dolor torácico opresivo, antecedente de hipertensión y estenosis coronaria severa",
+               "doc_type: 'patient_record' + sex: 'Masculino' + disease_present: true", "0.6611",
+               "Historia clínica de paciente de alto riesgo del dataset UCI Heart Disease."),
+        "Q5": ("Tratamiento de revascularización y pronóstico para paciente con defecto de perfusión reversible SPECT y angina inducible",
+               "Sin filtro (consulta cross-modal)", "0.6287",
+               "Correlación híbrida: isquemia viable inducible (thal=7) y cateterismo prioritario."),
+    }
+
     queries_table_data = [
         [
             Paragraph("<b>ID</b>", table_cell_bold),
             Paragraph("<b>Pregunta de Entrada en Lenguaje Natural</b>", table_cell_bold),
             Paragraph("<b>Filtro de Metadatos Qdrant</b>", table_cell_bold),
             Paragraph("<b>Top-1 Score</b>", table_cell_bold),
-            Paragraph("<b>Fragmento Clínico Recuperado (Top-1)</b>", table_cell_bold)
-        ],
-        [
-            Paragraph("<b>Q1</b>", table_cell),
-            Paragraph("¿Cuáles son los criterios clínicos para diagnosticar angina típica y cómo se estratifica el riesgo en dolor torácico?", table_cell),
-            Paragraph("doc_type: 'clinical_guideline'", table_cell_code),
-            Paragraph("<b>0.5901</b>", table_cell_bold),
-            Paragraph("<i>MinSalud GPC:</i> Angina Típica (Tipo 1) cumple opresión retroesternal con irradiación típica desencadenada por esfuerzo...", table_cell)
-        ],
-        [
-            Paragraph("<b>Q2</b>", table_cell),
-            Paragraph("¿Qué implicación clínica tiene una depresión del segmento ST mayor a 2 mm y pendiente descendente en esfuerzo?", table_cell),
-            Paragraph("doc_type: 'diagnostic_protocol'", table_cell_code),
-            Paragraph("<b>0.5791</b>", table_cell_bold),
-            Paragraph("<i>ACC/AHA:</i> Depresión ST > 2.0 mm con Slope 3 (Downsloping) denota isquemia severa multivaso y riesgo inminente de IAM...", table_cell)
-        ],
-        [
-            Paragraph("<b>Q3</b>", table_cell),
-            Paragraph("¿Cuáles son las metas de colesterol LDL con estatinas de alta potencia y el protocolo de doble antiagregación plaquetaria?", table_cell),
-            Paragraph("doc_type: 'pharmacology_protocol'", table_cell_code),
-            Paragraph("<b>0.7013</b>", table_cell_bold),
-            Paragraph("<i>ESC/OMS:</i> Meta c-LDL < 55 mg/dL con atorvastatina 80 mg + DAPT (AAS 100 mg + Ticagrelor 90 mg c/12h por 12 meses)...", table_cell)
-        ],
-        [
-            Paragraph("<b>Q4</b>", table_cell),
-            Paragraph("Paciente masculino mayor de 60 años con dolor torácico opresivo, antecedente de hipertensión y estenosis coronaria severa", table_cell),
-            Paragraph("doc_type: 'patient_record'<br/>sex: 'Masculino'<br/>disease_present: true", table_cell_code),
-            Paragraph("<b>0.6611</b>", table_cell_bold),
-            Paragraph("<i>Paciente #299:</i> Masculino 68 años, dolor tipo 4, HTA 144 mmHg, fluoroscopía 1 vaso calcificado, riesgo alto...", table_cell)
-        ],
-        [
-            Paragraph("<b>Q5</b>", table_cell),
-            Paragraph("Tratamiento de revascularización y pronóstico para paciente con defecto de perfusión reversible SPECT y angina inducible", table_cell),
-            Paragraph("Sin filtro (Cross-modal)", table_cell_code),
-            Paragraph("<b>0.6287</b>", table_cell_bold),
-            Paragraph("<i>Correlación Híbrida:</i> Criterio de isquemia viable inducible thal=7 requiriendo cateterismo y revascularización prioritaria...", table_cell)
+            Paragraph("<b>Fragmento Clínico Recuperado (Top-1)</b>", table_cell_bold),
         ]
     ]
+
+    for qid in ("Q1", "Q2", "Q3", "Q4", "Q5"):
+        data = measured.get(qid)
+        if data:
+            question = data["query"]
+            filter_text = data["filter_label"]
+            score_text = f"{data['top1_score']:.4f}"
+            snippet = data.get("snippet") or data.get("expected", "")
+            source = data.get("source_title", "")
+            fragment = f"<i>{source}:</i> {_plain_text(snippet)}" if source else _plain_text(snippet)
+        else:
+            question, filter_text, score_text, fragment = fallback[qid]
+        queries_table_data.append(
+            [
+                Paragraph(f"<b>{qid}</b>", table_cell),
+                Paragraph(question, table_cell),
+                Paragraph(filter_text, table_cell_code),
+                Paragraph(f"<b>{score_text}</b>", table_cell_bold),
+                Paragraph(fragment, table_cell),
+            ]
+        )
 
     t_queries = Table(queries_table_data, colWidths=[24, 150, 110, 52, 195])
     t_queries.setStyle(TableStyle([
@@ -364,9 +410,9 @@ def generate_poster_pdf(output_path: str = "Poster_Infografia_ACA1_RAG_Salud.pdf
     story.append(make_section_banner("5. Análisis Cuantitativo de Desempeño y Distribución de Similitud"))
     story.append(Spacer(1, 3))
 
-    chart_img_path = "output/metricas_similitud_notebook.png"
+    chart_img_path = str(settings.output_dir / "metricas_similitud_notebook.png")
     if not os.path.exists(chart_img_path):
-        chart_img_path = "output/similarity_distribution.png"
+        chart_img_path = str(settings.output_dir / "similarity_distribution.png")
     if os.path.exists(chart_img_path):
         story.append(Image(chart_img_path, width=531, height=170))
     story.append(Spacer(1, 6))
@@ -375,11 +421,21 @@ def generate_poster_pdf(output_path: str = "Poster_Infografia_ACA1_RAG_Salud.pdf
     story.append(make_section_banner("6. Conclusiones Técnicas, Enlaces Operativos y Referencias (Normas APA 7)"))
     story.append(Spacer(1, 3))
 
+    latency = summary.get("latency", {})
+    latency_typ = latency.get("search_median_ms", latency.get("search_mean_ms"))
+    latency_text = (
+        f"respuestas en <b>{latency_typ:.0f} ms</b> (mediana de la búsqueda remota contra el clúster) "
+        "combinando recuperación vectorial y filtros booleanos de payload"
+        if latency_typ
+        else "respuestas de baja latencia en recuperación vectorial combinada con filtros booleanos"
+    )
+
     p_conclusiones = Paragraph(
         "<b>Conclusiones de la Arquitectura:</b><br/>"
-        "• <b>Desempeño y Latencia:</b> El clúster remoto en Qdrant Cloud logró respuestas sub-150ms en recuperación vectorial combinada con filtros booleanos.<br/>"
+        f"• <b>Desempeño y Latencia:</b> El clúster remoto en Qdrant Cloud logró {latency_text}.<br/>"
         "• <b>Costo Cero Real:</b> Operación 100% sobre capas gratuitas (Qdrant Cloud Free Tier 1GB y modelo de embeddings local multilingual-MiniLM-L12).<br/>"
-        "• <b>Integración Multimodal:</b> La transformación de datos tabulares a viñetas narrativas enriquecidas posibilitó cruzar registros de pacientes con normatividad médica con una similitud coseno máxima de 0.7013.",
+        "• <b>Integración Multimodal:</b> La transformación de datos tabulares a viñetas narrativas enriquecidas posibilitó cruzar registros de pacientes con normatividad médica"
+        + (f" con una similitud coseno máxima de {max_score:.4f}." if max_score else "."),
         body_style
     )
 
@@ -387,8 +443,8 @@ def generate_poster_pdf(output_path: str = "Poster_Infografia_ACA1_RAG_Salud.pdf
         "<b>Enlaces Operativos Oficiales:</b><br/>"
         "• <b>Repositorio GitHub:</b> <font color='#1A5F7A'><u>https://github.com/jaimeacabreraa/computacion_en_la_nube</u></font><br/>"
         "• <b>Video de Sustentación (3-5 min):</b> <font color='#1A5F7A'><u>https://youtu.be/sustentacion-aca1-rag-salud</u></font><br/>"
-        "• <b>Qdrant Cloud Endpoint:</b> <font color='#1A5F7A'><u>https://8a0b268f-5608-433c-9a03-bd47a0b901ca.ca-central-1-0.aws.cloud.qdrant.io</u></font><br/>"
-        "• <b>Notebook Reproducible:</b> <font color='#1A5F7A'><u>heart_disease_rag_qdrant.ipynb</u></font>",
+        "• <b>Documentación del proyecto:</b> <font color='#1A5F7A'><u>docs/EXPLICACION_SUSTENTACION.md</u></font><br/>"
+        "• <b>Notebook Reproducible:</b> <font color='#1A5F7A'><u>notebooks/heart_disease_rag_qdrant.ipynb</u></font>",
         body_style
     )
 

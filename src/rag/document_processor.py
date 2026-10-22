@@ -2,7 +2,7 @@ import os
 from typing import List, Dict, Any
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
-from src.config import settings
+from rag.config import settings
 
 DOCUMENT_METADATA = {
     "DOC_01_Guia_Clinica_Enfermedad_Coronaria_MinSalud_OMS.md": {

@@ -6,7 +6,37 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 
-def generate_easy_pdf(output_path: str = "Guia_Facil_Resultados_RAG.pdf"):
+from rag.config import settings
+from rag.evaluation import load_summary
+
+# Descripciones legibles de cada prueba del benchmark oficial.
+PRUEBA_TITULOS = {
+    "Q1": ("Prueba 1: Diagnóstico de Angina", "clinical_guideline (MinSalud)"),
+    "Q2": ("Prueba 2: Prueba de Esfuerzo", "diagnostic_protocol (ACC/AHA)"),
+    "Q3": ("Prueba 3: Medicación y Metas", "pharmacology_protocol (ESC/OMS)"),
+    "Q4": ("Prueba 4: Búsqueda de Pacientes", "patient_record (UCI Heart)"),
+    "Q5": ("Prueba 5: Consulta Híbrida", "Guía + Paciente simultáneo"),
+}
+
+PRUEBA_INTERPRETACIONES = {
+    "Q1": "<b>Qué encontró:</b> La regla de oro de la Guía MinSalud/OMS: define que la angina típica debe cumplir 3 requisitos (opresivo, inducido por esfuerzo/estrés y que cede con reposo o nitratos). Indica que en mayores de 50 años la probabilidad pretest supera el 85%.",
+    "Q2": "<b>Qué encontró:</b> El protocolo de la AHA explica que un desnivel descendente o plano > 2 mm es criterio de severidad e isquemia miocárdica de alto riesgo, requiriendo cateterismo/angiografía.",
+    "Q3": "<b>Qué encontró:</b> El consenso ESC/OMS indica que la meta de LDL en prevención secundaria es < 55 mg/dL (o reducción del 50%), y prescribe Ácido Acetilsalicílico (AAS 75-100 mg indefinido) + Ticagrelor 90 mg c/12h tras infarto o stent.",
+    "Q4": "<b>Qué encontró:</b> Se aplicó un filtro en Qdrant (solo hombres con enfermedad confirmada). El sistema ubica histories clínicas de pacientes con el mismo perfil de riesgo, demostrando cómo un médico puede encontrar casos gemelos en segundos.",
+    "Q5": "<b>Qué encontró:</b> Recuperó simultáneamente la indicación de angioplastia/stent del protocolo y casos de pacientes que tuvieron exactamente el mismo defecto de perfusión en medicina nuclear.",
+}
+
+
+def generate_easy_pdf(output_path: str | None = None):
+    """Genera la guía fácil de interpretación de resultados en PDF."""
+    output_path = output_path or str(settings.output_dir / "Guia_Facil_Resultados_RAG.pdf")
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+
+    summary = load_summary() or {}
+    measured = {q["id"]: q for q in summary.get("queries", [])}
+    corpus = summary.get("corpus", {})
+    total_fragments = corpus.get("total_vectors", 349)
+    by_rank = summary.get("by_rank", {})
     doc = SimpleDocTemplate(
         output_path,
         pagesize=letter,
@@ -106,7 +136,7 @@ def generate_easy_pdf(output_path: str = "Guia_Facil_Resultados_RAG.pdf"):
     story.append(Paragraph("1. ¿Qué se hizo en este Notebook?", h1_style))
     intro_p = Paragraph(
         "Este cuaderno tomó <b>303 historias de pacientes reales</b> (UCI Heart Disease) y <b>3 guías médicas oficiales</b> "
-        "(MinSalud, ACC/AHA y ESC/OMS), las dividió en 349 fragmentos inteligentes y las guardó como vectores en <b>Qdrant Cloud</b> (AWS). "
+        f"(MinSalud, ACC/AHA y ESC/OMS), las dividió en <b>{total_fragments} fragmentos inteligentes</b> y las guardó como vectores en <b>Qdrant Cloud</b> (AWS). "
         "Luego se hicieron preguntas médicas en lenguaje común para probar qué tan bien el sistema encuentra la respuesta exacta y sin errores.",
         body_style
     )
@@ -116,27 +146,17 @@ def generate_easy_pdf(output_path: str = "Guia_Facil_Resultados_RAG.pdf"):
     # 2. LAS 5 PRUEBAS Y SU INTERPRETACIÓN FÁCIL
     story.append(Paragraph("2. Resumen e Interpretación de las 5 Consultas Probadas", h1_style))
 
-    queries_data = [
-        ("Prueba 1: Diagnóstico de Angina", "clinical_guideline (MinSalud)", "0.5901",
-         "¿Cuáles son los criterios clínicos para diagnosticar angina típica y cómo se estratifica el riesgo en dolor torácico?",
-         "<b>Qué encontró:</b> La regla de oro de la Guía MinSalud/OMS: define que la angina típica debe cumplir 3 requisitos (opresivo, inducido por esfuerzo/estrés y que cede con reposo o nitratos). Indica que en mayores de 50 años la probabilidad pretest supera el 85%."),
-
-        ("Prueba 2: Prueba de Esfuerzo", "diagnostic_protocol (ACC/AHA)", "0.5791",
-         "¿Qué implicación clínica tiene una depresión del segmento ST mayor a 2 mm y pendiente descendente en la prueba de esfuerzo?",
-         "<b>Qué encontró:</b> El protocolo de la AHA explica que un desnivel descendente o plano > 2 mm es criterio de severidad e isquemia miocárdica de alto riesgo, requiriendo cateterismo/angiografía."),
-
-        ("Prueba 3: Medicación y Metas", "pharmacology_protocol (ESC/OMS)", "0.5843",
-         "¿Cuáles son las metas de colesterol LDL con estatinas de alta potencia y el protocolo de doble antiagregación plaquetaria?",
-         "<b>Qué encontró:</b> El consenso ESC/OMS indica que la meta de LDL en prevención secundaria es < 55 mg/dL (o reducción del 50%), y prescribe Ácido Acetilsalicílico (AAS 75-100 mg indefinido) + Ticagrelor 90 mg c/12h tras infarto o stent."),
-
-        ("Prueba 4: Búsqueda de Pacientes", "patient_record (UCI Heart)", "0.6611",
-         "Paciente masculino mayor de 60 años con dolor torácico opresivo, antecedente de hipertensión y estenosis coronaria severa",
-         "<b>Qué encontró:</b> Se aplicó un filtro en Qdrant (Solo Hombres con enfermedad confirmada). El sistema ubicó con precisión al <b>Paciente #299</b> (65 años, 3 vasos calcificados, riesgo crítico), demostrando cómo un médico puede encontrar casos gemelos en segundos."),
-
-        ("Prueba 5: Consulta Híbrida", "Guía + Paciente simultáneo", "0.5312",
-         "Tratamiento de revascularización y pronóstico para paciente con defecto de perfusión reversible SPECT y angina inducible",
-         "<b>Qué encontró:</b> Recuperó simultáneamente la indicación de angioplastia/stent del protocolo y casos de pacientes que tuvieron exactamente el mismo defecto de perfusión en medicina nuclear.")
-    ]
+    queries_data = []
+    for qid in ("Q1", "Q2", "Q3", "Q4", "Q5"):
+        title, doc_type = PRUEBA_TITULOS[qid]
+        data = measured.get(qid)
+        if data:
+            query = data["query"]
+            score = f"{data['top1_score']:.4f}"
+        else:
+            query = "Ejecute `rag evaluate` para regenerar el benchmark oficial."
+            score = "n/d"
+        queries_data.append((title, doc_type, score, query, PRUEBA_INTERPRETACIONES[qid]))
 
     for title, doc_type, score, query, meaning in queries_data:
         card_content = [
@@ -198,7 +218,7 @@ def generate_easy_pdf(output_path: str = "Guia_Facil_Resultados_RAG.pdf"):
         [
             Paragraph("<b>Gráfica Derecha: Similitud Media según Ranking (Rank 1 al 5)</b><br/>"
                       "• Compara la puntuación del 1° resultado devuelto versus el 2°, 3°, 4° y 5°.<br/>"
-                      "• <b>Qué significa (Degradación Controlada):</b> La barra del Rank 1 es la más alta (~0.60), y va bajando suavemente hasta el Rank 5 (~0.47). "
+                      f"• <b>Qué significa (Degradación Controlada):</b> La barra del Rank 1 es la más alta (~{by_rank.get('1', 0.0):.2f}), y va bajando suavemente hasta el Rank 5 (~{by_rank.get('5', 0.0):.2f}). "
                       "Esto demuestra matemáticamente que el sistema siempre coloca <b>la respuesta más exacta en el primer lugar</b>.", card_text)
         ]
     ]
@@ -215,16 +235,30 @@ def generate_easy_pdf(output_path: str = "Guia_Facil_Resultados_RAG.pdf"):
     story.append(t_chart)
     story.append(Spacer(1, 10))
 
-    # 4. TABLA RESUMEN DE MÉTRICAS
+    # 4. TABLA RESUMEN DE MÉTRICAS (valores medidos en la última ejecución)
     story.append(Paragraph("4. Tabla Cuantitativa de Desempeño (Top-5)", h1_style))
     table_rows = [
         ["Identificador", "Enfoque Clínico", "Media", "Desv. Est.", "Mínimo", "Máximo (Top-1)"],
-        ["Q1_GUIA_ANGINA", "Criterios Angina Típica", "0.5501", "±0.031", "0.5080", "0.5901"],
-        ["Q2_PROTOCOLO_ST", "Prueba de Esfuerzo (ST)", "0.5140", "±0.042", "0.4560", "0.5791"],
-        ["Q3_FARMACO_METAS", "Estatinas y LDL", "0.5362", "±0.038", "0.4850", "0.5843"],
-        ["Q4_PACIENTES", "Cohorte Masculino Severo", "0.6124", "±0.035", "0.5640", "0.6611"],
-        ["Q5_HIBRIDA", "SPECT e Isquemia Inducible", "0.4882", "±0.036", "0.4370", "0.5312"],
     ]
+    for qid, enfoque in (
+        ("Q1", "Criterios Angina Típica"),
+        ("Q2", "Prueba de Esfuerzo (ST)"),
+        ("Q3", "Estatinas y LDL"),
+        ("Q4", "Cohorte Masculino Severo"),
+        ("Q5", "SPECT e Isquemia Inducible"),
+    ):
+        stats = summary.get("per_query_stats", {}).get(qid)
+        if stats:
+            table_rows.append([
+                qid,
+                enfoque,
+                f"{stats['mean']:.4f}",
+                f"±{stats['std']:.4f}",
+                f"{stats['min']:.4f}",
+                f"{stats['max']:.4f}",
+            ])
+        else:
+            table_rows.append([qid, enfoque, "n/d", "n/d", "n/d", "n/d"])
     t_metrics = Table(table_rows, colWidths=[110, 150, 70, 70, 70, 70])
     t_metrics.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), C_PRIMARY),

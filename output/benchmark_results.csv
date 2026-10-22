@@ -1,0 +1,64 @@
+query_id,query_code,query,filter_label,rank,score,doc_type,source_title,snippet
+Q1,Q1_CLINICAL_GUIDELINE,¿Cuáles son los criterios clínicos para diagnosticar angina típica y cuál es el algoritmo de estratificación de riesgo en dolor torácico?,doc_type: 'clinical_guideline',1,0.6154007,clinical_guideline,Guía de Práctica Clínica: Diagnóstico y Estratificación de la Enfermedad Arterial Coronaria,"## 5. Algoritmo de Decisión Clínica y Priorización
+1. Todo paciente con angina típica (Tipo 1) y factores de riesgo concurrentes (edad > 55 años, HTA estadio 1-"
+Q1,Q1_CLINICAL_GUIDELINE,¿Cuáles son los criterios clínicos para diagnosticar angina típica y cuál es el algoritmo de estratificación de riesgo en dolor torácico?,doc_type: 'clinical_guideline',2,0.5590538,clinical_guideline,Guía de Práctica Clínica: Diagnóstico y Estratificación de la Enfermedad Arterial Coronaria,"1. **Angina Típica (Tipo 1 / Confirmed Angina):**
+   - Cumple tres características simultáneas: (a) Dolor o malestar retroesternal u opresivo con irradiación a "
+Q1,Q1_CLINICAL_GUIDELINE,¿Cuáles son los criterios clínicos para diagnosticar angina típica y cuál es el algoritmo de estratificación de riesgo en dolor torácico?,doc_type: 'clinical_guideline',3,0.5356833,clinical_guideline,Guía de Práctica Clínica: Diagnóstico y Estratificación de la Enfermedad Arterial Coronaria,"---
+
+## 2. Semiología y Clasificación del Dolor Torácico (Chest Pain - CP)
+El dolor torácico es el síntoma cardinal en la evaluación de cardiopatía isquémica. C"
+Q1,Q1_CLINICAL_GUIDELINE,¿Cuáles son los criterios clínicos para diagnosticar angina típica y cuál es el algoritmo de estratificación de riesgo en dolor torácico?,doc_type: 'clinical_guideline',4,0.5316971,clinical_guideline,Guía de Práctica Clínica: Diagnóstico y Estratificación de la Enfermedad Arterial Coronaria,"---
+
+## 1. Justificación y Propósito Clínico
+La enfermedad arterial coronaria (EAC) representa la principal causa de morbilidad y mortalidad a nivel global. El "
+Q1,Q1_CLINICAL_GUIDELINE,¿Cuáles son los criterios clínicos para diagnosticar angina típica y cuál es el algoritmo de estratificación de riesgo en dolor torácico?,doc_type: 'clinical_guideline',5,0.4734451,clinical_guideline,Guía de Práctica Clínica: Diagnóstico y Estratificación de la Enfermedad Arterial Coronaria,"2. **Angina Atípica (Tipo 2 / Atypical Angina):**
+   - Cumple dos de las tres características de la angina típica.
+   - Frecuente en pacientes diabéticos, mujer"
+Q2,Q2_ERGOMETRY_DIAGNOSTIC,¿Qué significado clínico tiene una depresión del segmento ST mayor a 2 mm con pendiente plana o descendente durante la prueba de esfuerzo?,doc_type: 'diagnostic_protocol',1,0.5732686,diagnostic_protocol,"Protocolo Clínico de Pruebas de Esfuerzo, Ergometría y Angiografía Coronaria","### 3.1. Depresión del Segmento ST Inducida por Esfuerzo (Oldpeak)
+- **Medición:** Descenso del punto J y del segmento ST medido a 60-80 ms posterior al punto J"
+Q2,Q2_ERGOMETRY_DIAGNOSTIC,¿Qué significado clínico tiene una depresión del segmento ST mayor a 2 mm con pendiente plana o descendente durante la prueba de esfuerzo?,doc_type: 'diagnostic_protocol',2,0.44449905,diagnostic_protocol,"Protocolo Clínico de Pruebas de Esfuerzo, Ergometría y Angiografía Coronaria","### 3.2. Pendiente del Segmento ST en el Pico del Esfuerzo (Slope)
+- **Slope 1 (Ascendente / Upsloping):** Descenso inicial con rápido ascenso hacia la línea is"
+Q2,Q2_ERGOMETRY_DIAGNOSTIC,¿Qué significado clínico tiene una depresión del segmento ST mayor a 2 mm con pendiente plana o descendente durante la prueba de esfuerzo?,doc_type: 'diagnostic_protocol',3,0.43341833,diagnostic_protocol,"Protocolo Clínico de Pruebas de Esfuerzo, Ergometría y Angiografía Coronaria","### 2.2. Angina Inducida por Ejercicio (Exang)
+- **Exang = 1 (Presente):** Aparición de opresión retroesternal característica durante el esfuerzo físico que obl"
+Q2,Q2_ERGOMETRY_DIAGNOSTIC,¿Qué significado clínico tiene una depresión del segmento ST mayor a 2 mm con pendiente plana o descendente durante la prueba de esfuerzo?,doc_type: 'diagnostic_protocol',4,0.40229017,diagnostic_protocol,"Protocolo Clínico de Pruebas de Esfuerzo, Ergometría y Angiografía Coronaria",- **Oldpeak > 2.0 - 2.5 mm:** Respuesta marcadamente anormal; sugiere isquemia miocárdica severa o lesión de tronco coronario izquierdo / enfermedad trivascular
+Q2,Q2_ERGOMETRY_DIAGNOSTIC,¿Qué significado clínico tiene una depresión del segmento ST mayor a 2 mm con pendiente plana o descendente durante la prueba de esfuerzo?,doc_type: 'diagnostic_protocol',5,0.36796278,diagnostic_protocol,"Protocolo Clínico de Pruebas de Esfuerzo, Ergometría y Angiografía Coronaria",- **Slope 3 (Descendente / Downsloping):** Descenso progresivo del segmento ST. Representa el patrón electrocardiográfico de mayor valor predictivo positivo (> 
+Q3,Q3_PHARMACOLOGY_SECONDARY,¿Cuáles son las metas de c-LDL con estatinas de alta potencia y el esquema de doble antiagregación plaquetaria con aspirina y ticagrelor?,doc_type: 'pharmacology_protocol',1,0.57643926,pharmacology_protocol,"Protocolo Clínico de Manejo Terapéutico, Farmacológico y Prevención Cardiovascular Secundaria","### 2.2. Optimización Lipídica Agresiva
+- **Meta de Colesterol LDL (c-LDL):**
+  - Reducción $\ge 50\%$ respecto al valor basal y alcanzar un c-LDL absoluto `< 5"
+Q3,Q3_PHARMACOLOGY_SECONDARY,¿Cuáles son las metas de c-LDL con estatinas de alta potencia y el esquema de doble antiagregación plaquetaria con aspirina y ticagrelor?,doc_type: 'pharmacology_protocol',2,0.559047,pharmacology_protocol,"Protocolo Clínico de Manejo Terapéutico, Farmacológico y Prevención Cardiovascular Secundaria","### 3.2. Hipolipemiantes de Alta Intensidad
+- **Estatinas de Alta Potencia:** Atorvastatina 40-80 mg/día o Rosuvastatina 20-40 mg/día.
+- **Terapia Combinada:** "
+Q3,Q3_PHARMACOLOGY_SECONDARY,¿Cuáles son las metas de c-LDL con estatinas de alta potencia y el esquema de doble antiagregación plaquetaria con aspirina y ticagrelor?,doc_type: 'pharmacology_protocol',3,0.537468,pharmacology_protocol,"Protocolo Clínico de Manejo Terapéutico, Farmacológico y Prevención Cardiovascular Secundaria","### 3.1. Terapia Antiagregante Plaquetaria
+1. **Ácido Acetilsalicílico (AAS):** Dosis de mantenimiento de 75 a 100 mg diarios vía oral de forma indefinida en to"
+Q3,Q3_PHARMACOLOGY_SECONDARY,¿Cuáles son las metas de c-LDL con estatinas de alta potencia y el esquema de doble antiagregación plaquetaria con aspirina y ticagrelor?,doc_type: 'pharmacology_protocol',4,0.49195495,pharmacology_protocol,"Protocolo Clínico de Manejo Terapéutico, Farmacológico y Prevención Cardiovascular Secundaria","### 3.3. Betabloqueadores y Moduladores Neurohormonales
+- **Betabloqueadores cardioselectivos:** Bisoprolol (2.5 - 10 mg/día), Metoprolol succinato (50 - 200 mg"
+Q3,Q3_PHARMACOLOGY_SECONDARY,¿Cuáles son las metas de c-LDL con estatinas de alta potencia y el esquema de doble antiagregación plaquetaria con aspirina y ticagrelor?,doc_type: 'pharmacology_protocol',5,0.47721967,pharmacology_protocol,"Protocolo Clínico de Manejo Terapéutico, Farmacológico y Prevención Cardiovascular Secundaria","---
+
+## 1. Principios del Tratamiento Integral de la Cardiopatía Isquémica
+El manejo de pacientes con diagnóstico confirmado de enfermedad coronaria (presencia "
+Q4,Q4_PATIENT_COHORT_HIGH_RISK,"Paciente masculino mayor de 60 años con angina típica, hipertensión estadio 2, fluoroscopía con vasos mayores comprometidos y alto riesgo cardiovascular",doc_type: 'patient_record' + sex: 'Masculino' + disease_present: true + age >= 60,1,0.70141864,patient_record,Paciente #125,"HISTORIA CLÍNICA CARDIOLÓGICA - PACIENTE #125
+Datos Demográficos: Paciente de 65 años de edad, sexo Masculino.
+Motivo de Consulta y Dolor Torácico: Angina típic"
+Q4,Q4_PATIENT_COHORT_HIGH_RISK,"Paciente masculino mayor de 60 años con angina típica, hipertensión estadio 2, fluoroscopía con vasos mayores comprometidos y alto riesgo cardiovascular",doc_type: 'patient_record' + sex: 'Masculino' + disease_present: true + age >= 60,2,0.70078105,patient_record,Paciente #244,"HISTORIA CLÍNICA CARDIOLÓGICA - PACIENTE #244
+Datos Demográficos: Paciente de 61 años de edad, sexo Masculino.
+Motivo de Consulta y Dolor Torácico: Angina típic"
+Q4,Q4_PATIENT_COHORT_HIGH_RISK,"Paciente masculino mayor de 60 años con angina típica, hipertensión estadio 2, fluoroscopía con vasos mayores comprometidos y alto riesgo cardiovascular",doc_type: 'patient_record' + sex: 'Masculino' + disease_present: true + age >= 60,3,0.6887466,patient_record,Paciente #188,"HISTORIA CLÍNICA CARDIOLÓGICA - PACIENTE #188
+Datos Demográficos: Paciente de 66 años de edad, sexo Masculino.
+Motivo de Consulta y Dolor Torácico: Angina atípi"
+Q4,Q4_PATIENT_COHORT_HIGH_RISK,"Paciente masculino mayor de 60 años con angina típica, hipertensión estadio 2, fluoroscopía con vasos mayores comprometidos y alto riesgo cardiovascular",doc_type: 'patient_record' + sex: 'Masculino' + disease_present: true + age >= 60,4,0.6854445,patient_record,Paciente #138,"HISTORIA CLÍNICA CARDIOLÓGICA - PACIENTE #138
+Datos Demográficos: Paciente de 62 años de edad, sexo Masculino.
+Motivo de Consulta y Dolor Torácico: Angina atípi"
+Q4,Q4_PATIENT_COHORT_HIGH_RISK,"Paciente masculino mayor de 60 años con angina típica, hipertensión estadio 2, fluoroscopía con vasos mayores comprometidos y alto riesgo cardiovascular",doc_type: 'patient_record' + sex: 'Masculino' + disease_present: true + age >= 60,5,0.6548965,patient_record,Paciente #25,"HISTORIA CLÍNICA CARDIOLÓGICA - PACIENTE #025
+Datos Demográficos: Paciente de 60 años de edad, sexo Masculino.
+Motivo de Consulta y Dolor Torácico: Asintomático"
+Q5,Q5_HYBRID_CROSS_MODAL,Tratamiento de revascularización y pronóstico para defecto de perfusión reversible en gammagrafía SPECT con angina inducida por ejercicio,Sin filtro (consulta cross-modal),1,0.5675937,diagnostic_protocol,"Protocolo Clínico de Pruebas de Esfuerzo, Ergometría y Angiografía Coronaria","## 5. Centellografía de Perfusión Miocárdica / Gammagrafía (Thal)
+El estudio de perfusión miocárdica con radiotrazadores (Talio-201 o Tecnecio-99m Sestamibi / S"
+Q5,Q5_HYBRID_CROSS_MODAL,Tratamiento de revascularización y pronóstico para defecto de perfusión reversible en gammagrafía SPECT con angina inducida por ejercicio,Sin filtro (consulta cross-modal),2,0.53789777,pharmacology_protocol,"Protocolo Clínico de Manejo Terapéutico, Farmacológico y Prevención Cardiovascular Secundaria","2. **Estratificación por Biomarcadores y ECG:**
+   - Si se evidencia elevación del segmento ST persistente en 2 derivaciones contiguas: activar código infarto p"
+Q5,Q5_HYBRID_CROSS_MODAL,Tratamiento de revascularización y pronóstico para defecto de perfusión reversible en gammagrafía SPECT con angina inducida por ejercicio,Sin filtro (consulta cross-modal),3,0.5275649,clinical_guideline,Guía de Práctica Clínica: Diagnóstico y Estratificación de la Enfermedad Arterial Coronaria,"## 4. Electrocardiografía de Reposo (Resting ECG - Restecg)
+La evaluación del ECG de 12 derivaciones en reposo clasifica al paciente en:
+- **Categoría 0 (Normal"
+Q5,Q5_HYBRID_CROSS_MODAL,Tratamiento de revascularización y pronóstico para defecto de perfusión reversible en gammagrafía SPECT con angina inducida por ejercicio,Sin filtro (consulta cross-modal),4,0.5061592,diagnostic_protocol,"Protocolo Clínico de Pruebas de Esfuerzo, Ergometría y Angiografía Coronaria",- **CA = 1:** Enfermedad univaso. Manejo preferente médico o angioplastia coronaria transluminal percutánea (ACTP) con implante de stent medicado según el vaso 
+Q5,Q5_HYBRID_CROSS_MODAL,Tratamiento de revascularización y pronóstico para defecto de perfusión reversible en gammagrafía SPECT con angina inducida por ejercicio,Sin filtro (consulta cross-modal),5,0.50393796,clinical_guideline,Guía de Práctica Clínica: Diagnóstico y Estratificación de la Enfermedad Arterial Coronaria,"2. **Angina Atípica (Tipo 2 / Atypical Angina):**
+   - Cumple dos de las tres características de la angina típica.
+   - Frecuente en pacientes diabéticos, mujer"

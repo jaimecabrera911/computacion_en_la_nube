@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional
 from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
-from src.config import settings
+from rag.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +55,7 @@ def create_or_recreate_collection(
         ("disease_present", models.PayloadSchemaType.BOOL),
         ("risk_level", models.PayloadSchemaType.KEYWORD),
         ("patient_id", models.PayloadSchemaType.INTEGER),
+        ("age", models.PayloadSchemaType.INTEGER),
     ]
     for field_name, schema in payload_indexes:
         try:

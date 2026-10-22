@@ -1,0 +1,127 @@
+{
+  "top1_mean": 0.6068,
+  "top1_max": 0.7014,
+  "top1_min": 0.5676,
+  "all_mean": 0.5461,
+  "by_rank": {
+    "1": 0.6068,
+    "2": 0.5603,
+    "3": 0.5446,
+    "4": 0.5235,
+    "5": 0.4955
+  },
+  "per_query_stats": {
+    "Q1": {
+      "mean": 0.5431,
+      "std": 0.0459,
+      "min": 0.4734,
+      "max": 0.6154
+    },
+    "Q2": {
+      "mean": 0.4443,
+      "std": 0.0698,
+      "min": 0.368,
+      "max": 0.5733
+    },
+    "Q3": {
+      "mean": 0.5284,
+      "std": 0.0381,
+      "min": 0.4772,
+      "max": 0.5764
+    },
+    "Q4": {
+      "mean": 0.6863,
+      "std": 0.0169,
+      "min": 0.6549,
+      "max": 0.7014
+    },
+    "Q5": {
+      "mean": 0.5286,
+      "std": 0.0233,
+      "min": 0.5039,
+      "max": 0.5676
+    }
+  },
+  "queries": [
+    {
+      "id": "Q1",
+      "code": "Q1_CLINICAL_GUIDELINE",
+      "description": "Criterios de angina típica y estratificación de riesgo en dolor torácico",
+      "query": "¿Cuáles son los criterios clínicos para diagnosticar angina típica y cuál es el algoritmo de estratificación de riesgo en dolor torácico?",
+      "filter_label": "doc_type: 'clinical_guideline'",
+      "top1_score": 0.6154,
+      "doc_type": "clinical_guideline",
+      "source_title": "Guía de Práctica Clínica: Diagnóstico y Estratificación de la Enfermedad Arterial Coronaria",
+      "snippet": "## 5. Algoritmo de Decisión Clínica y Priorización\n1. Todo paciente con angina típica (Tipo 1) y factores de riesgo concurrentes (edad > 55 años, HTA estadio 1-",
+      "expected": "Guía MinSalud: angina tipo 1 e indicación de ergometría."
+    },
+    {
+      "id": "Q2",
+      "code": "Q2_ERGOMETRY_DIAGNOSTIC",
+      "description": "Significado clínico de la depresión del ST > 2 mm con pendiente descendente",
+      "query": "¿Qué significado clínico tiene una depresión del segmento ST mayor a 2 mm con pendiente plana o descendente durante la prueba de esfuerzo?",
+      "filter_label": "doc_type: 'diagnostic_protocol'",
+      "top1_score": 0.5733,
+      "doc_type": "diagnostic_protocol",
+      "source_title": "Protocolo Clínico de Pruebas de Esfuerzo, Ergometría y Angiografía Coronaria",
+      "snippet": "### 3.1. Depresión del Segmento ST Inducida por Esfuerzo (Oldpeak)\n- **Medición:** Descenso del punto J y del segmento ST medido a 60-80 ms posterior al punto J",
+      "expected": "Protocolo ACC/AHA: isquemia severa multivaso (slope 3)."
+    },
+    {
+      "id": "Q3",
+      "code": "Q3_PHARMACOLOGY_SECONDARY",
+      "description": "Metas de c-LDL con estatinas y doble antiagregación plaquetaria (DAPT)",
+      "query": "¿Cuáles son las metas de c-LDL con estatinas de alta potencia y el esquema de doble antiagregación plaquetaria con aspirina y ticagrelor?",
+      "filter_label": "doc_type: 'pharmacology_protocol'",
+      "top1_score": 0.5764,
+      "doc_type": "pharmacology_protocol",
+      "source_title": "Protocolo Clínico de Manejo Terapéutico, Farmacológico y Prevención Cardiovascular Secundaria",
+      "snippet": "### 2.2. Optimización Lipídica Agresiva\n- **Meta de Colesterol LDL (c-LDL):**\n  - Reducción $\\ge 50\\%$ respecto al valor basal y alcanzar un c-LDL absoluto `< 5",
+      "expected": "Protocolo ESC/OMS: meta c-LDL < 55 mg/dL y DAPT por 12 meses."
+    },
+    {
+      "id": "Q4",
+      "code": "Q4_PATIENT_COHORT_HIGH_RISK",
+      "description": "Cohorte de pacientes masculinos mayores de 60 años con cardiopatía confirmada",
+      "query": "Paciente masculino mayor de 60 años con angina típica, hipertensión estadio 2, fluoroscopía con vasos mayores comprometidos y alto riesgo cardiovascular",
+      "filter_label": "doc_type: 'patient_record' + sex: 'Masculino' + disease_present: true + age >= 60",
+      "top1_score": 0.7014,
+      "doc_type": "patient_record",
+      "source_title": "Paciente #125",
+      "snippet": "HISTORIA CLÍNICA CARDIOLÓGICA - PACIENTE #125\nDatos Demográficos: Paciente de 65 años de edad, sexo Masculino.\nMotivo de Consulta y Dolor Torácico: Angina típic",
+      "expected": "Historia clínica de paciente de alto riesgo del dataset UCI."
+    },
+    {
+      "id": "Q5",
+      "code": "Q5_HYBRID_CROSS_MODAL",
+      "description": "Consulta híbrida abierta: isquemia inducible y decisión terapéutica",
+      "query": "Tratamiento de revascularización y pronóstico para defecto de perfusión reversible en gammagrafía SPECT con angina inducida por ejercicio",
+      "filter_label": "Sin filtro (consulta cross-modal)",
+      "top1_score": 0.5676,
+      "doc_type": "diagnostic_protocol",
+      "source_title": "Protocolo Clínico de Pruebas de Esfuerzo, Ergometría y Angiografía Coronaria",
+      "snippet": "## 5. Centellografía de Perfusión Miocárdica / Gammagrafía (Thal)\nEl estudio de perfusión miocárdica con radiotrazadores (Talio-201 o Tecnecio-99m Sestamibi / S",
+      "expected": "Correlación entre hallazgo gammagráfico y cateterismo coronario."
+    }
+  ],
+  "latency": {
+    "search_mean_ms": 104.6,
+    "search_median_ms": 102.6,
+    "search_min_ms": 100.7,
+    "search_max_ms": 120.9,
+    "embedding_ms": 14.5
+  },
+  "corpus": {
+    "total_vectors": 349,
+    "patients": 303,
+    "document_chunks": 46,
+    "by_doc_type": {
+      "clinical_guideline": 15,
+      "diagnostic_protocol": 18,
+      "pharmacology_protocol": 13,
+      "patient_record": 303
+    }
+  },
+  "collection_name": "clinical_heart_disease_rag",
+  "mode": "cloud"
+}
