@@ -97,12 +97,14 @@ def test_chunking_respeta_parametros():
 
 def test_busqueda_semantica_recupera_el_documento_correcto():
     """La búsqueda debe recuperar el fragmento del documento semánticamente más cercano."""
+    from qdrant_client import QdrantClient
     from sentence_transformers import SentenceTransformer
 
     from rag.config import settings
-    from rag.vector_store import get_qdrant_client
+    from rag.vector_store import create_or_recreate_collection, index_corpus_in_batches, semantic_search
 
-    client = get_qdrant_client()
+    # Cliente IN-MEMORY: las pruebas nunca deben tocar el clúster cloud.
+    client = QdrantClient(location=":memory:")
     create_or_recreate_collection(client, collection_name="test_collection", vector_size=384)
 
     modelo = SentenceTransformer(settings.embedding_model_name)
