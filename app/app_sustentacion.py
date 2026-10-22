@@ -631,11 +631,9 @@ def page_demo():
     header("🚀", "Demostración Funcional en Tiempo Real", "Búsqueda Semántica contra Qdrant Cloud")
 
     from rag.config import settings
-    from rag.query_parser import UNSET, parse_query
-    from rag.vector_store import build_metadata_filter, get_qdrant_client
-    from rag.evaluation import BENCHMARK_QUERIES
+    from rag.query_parser import parse_query
+    from rag.vector_store import get_qdrant_client
     from sentence_transformers import SentenceTransformer
-    from qdrant_client.http import models
 
     @st.cache_resource(show_spinner="Cargando modelo de embeddings SBERT (solo la primera vez)...")
     def load_model():
@@ -645,77 +643,34 @@ def page_demo():
     def load_client():
         return get_qdrant_client()
 
-    BATTERY = {
-        f"{bq['id']} — {bq['description']}": {
-            "text": bq["query"],
-            "doctype": (bq["filter"].must[0].match.value if bq["filter"] else ""),
-        }
-        for bq in BENCHMARK_QUERIES
-    }
+    # --- Interfaz mínima: el usuario escribe y el sistema se encarga -------------
+    # No hay selectores de doc_type, ni filtros manuales, ni batería de consultas:
+    # el sistema interpreta la consulta y aplica las restricciones por su cuenta.
+    EJEMPLOS = [
+        "¿Cuáles son los criterios para diagnosticar angina típica?",
+        "paciente masculino, mayor de 60 años, con enfermedad coronaria confirmada",
+        "¿Qué metas de c-LDL se manejan en prevención secundaria?",
+    ]
 
-    FILTER_LABELS = {
-        "": "🌐 Sin filtro (cross-modal)",
-        "clinical_guideline": "📘 clinical_guideline",
-        "diagnostic_protocol": "📈 diagnostic_protocol",
-        "pharmacology_protocol": "💊 pharmacology_protocol",
-        "patient_record": "🧑‍⚕️ patient_record",
-    }
-
-    query_text = st.text_area("✍️ Consulta médica en lenguaje natural (o elige una de la batería de abajo)",
-                              placeholder="Ej.: ¿Qué significado clínico tiene la depresión del segmento ST...?",
-                              height=90)
-    c1, c2, c3 = st.columns([1.3, 0.65, 0.75])
-    with c1:
-        pref = st.selectbox("🎯 Prefijar consulta de la batería oficial", list(BATTERY.keys()),
-                            key="demo_pin",
-                            on_change=lambda: st.session_state.__setattr__("query_txt", BATTERY[st.session_state["demo_pin"]]["text"])
-                            if "demo_pin" in st.session_state else None)
-    with c2:
-        doctype = st.selectbox("🏷️ Filtro doc_type", list(FILTER_LABELS.keys()),
-                               format_func=lambda k: FILTER_LABELS[k])
-    with c3:
-        top_k = st.slider("🔝 Top-k", 1, 10, 5)
-
-    # --- Filtros clínicos compuestos (índices de payload) ------------------------
-    with st.expander("⚙️ Filtros clínicos compuestos (índices de payload)", expanded=False):
-        st.caption(
-            "Un embedding captura **significado**, pero no puede comparar números: pedir "
-            "*'mayor de 60 años'* dentro del texto de la consulta **no** restringe la edad de los "
-            "resultados. Las restricciones estructuradas se aplican con estos filtros, que se "
-            "combinan con AND sobre los índices de payload de Qdrant."
-        )
-        f1, f2, f3, f4 = st.columns(4)
-        with f1:
-            sexo = st.selectbox("Sexo", ["(cualquiera)", "Masculino", "Femenino"], key="f_sexo")
-        with f2:
-            edad_min = st.number_input("Edad mínima", min_value=0, max_value=100, value=0, step=1, key="f_emin")
-        with f3:
-            edad_max = st.number_input("Edad máxima", min_value=0, max_value=100, value=100, step=1, key="f_emax")
-        with f4:
-            opcion_enf = st.selectbox("Enfermedad coronaria",
-                                       ["(cualquiera)", "Confirmada", "Ausente"], key="f_enf")
-        riesgo_sel = st.selectbox("Nivel de riesgo",
-                                   ["(cualquiera)", "Bajo", "Moderado", "Alto", "Muy Alto / Crítico"],
-                                   key="f_riesgo")
-
-    if st.session_state.get("query_txt", "") and not query_text:
-        query = st.session_state.get("query_txt", "")
-    else:
-        query = query_text.strip() or BATTERY.get(pref, {}).get("text", "")
-
-    # --- Interpretación automática de la consulta --------------------------------
-    auto_filtro = st.checkbox(
-        "🧠 Interpretar la consulta y aplicar los filtros automáticamente",
-        value=True,
-        key="auto_filtro",
-        help=(
-            "Un modelo de embeddings no puede comparar números: pedir 'mayor de 60 años' en el "
-            "texto NO restringe la edad de los resultados. El parser extrae esas restricciones "
-            "del texto y las aplica como filtro sobre los índices de payload de Qdrant."
-        ),
+    query_text = st.text_area(
+        "✍️ Escriba su consulta en lenguaje natural",
+        placeholder="Ej.: ¿Qué significado clínico tiene la depresión del segmento ST mayor a 2 mm...?",
+        height=90,
     )
-    parseado = parse_query(query if query else "")
-    if auto_filtro and parseado.conditions:
+
+    col_topk, col_ejemplos = st.columns([0.75, 2.25])
+    with col_topk:
+        top_k = st.slider("🔝 Top-k", 1, 10, 5)
+    with col_ejemplos:
+        st.caption("💡 Ejemplos que puede probar:")
+        for ejemplo in EJEMPLOS:
+            st.caption(f"   • {ejemplo}")
+
+    query = query_text.strip()
+
+    # --- Interpretación automática: el sistema decide el filtro ------------------
+    parseado = parse_query(query) if query else None
+    if parseado and parseado.conditions:
         st.markdown(
             "".join(
                 f"<span class='chip' style='background:rgba(56,217,169,.16);color:#8FFFF0'>🧠 {c}</span> "
@@ -723,26 +678,17 @@ def page_demo():
             ),
             unsafe_allow_html=True,
         )
-
-
-    # Traduce los controles de la UI al filtro de Qdrant.
-    condiciones = []
-    if sexo != "(cualquiera)":
-        condiciones.append(f"sexo={sexo}")
-    if edad_min > 0:
-        condiciones.append(f"edad>={int(edad_min)}")
-    if edad_max < 100:
-        condiciones.append(f"edad<={int(edad_max)}")
-    if opcion_enf != "(cualquiera)":
-        condiciones.append("enfermedad=confirmada" if opcion_enf == "Confirmada" else "enfermedad=ausente")
-    if riesgo_sel != "(cualquiera)":
-        condiciones.append(f"riesgo={riesgo_sel}")
-
-    st.caption(
-        f"🔎 Consulta a ejecutar: «{query[:160]}» · filtro: {FILTER_LABELS.get(doctype, doctype) or 'ninguno'} · "
-        f"Top-k = {top_k}"
-        + (f" · **condiciones: {' · '.join(condiciones)}**" if condiciones else "")
-    )
+        st.caption(
+            "El sistema interpretó su consulta y aplicó esas restricciones como filtro "
+            "sobre los índices de payload de Qdrant. "
+            "*Un embedding no puede comparar números: por eso la edad y el diagnóstico "
+            "se resuelven con filtros estructurados, no con el texto.*"
+        )
+    elif query:
+        st.caption(
+            "No se detectaron restricciones estructuradas en la consulta: se buscará por "
+            "similitud semántica sobre todo el corpus."
+        )
 
     ejecutar = st.button("⚡ Ejecutar búsqueda en vivo", width="stretch", type="primary")
 
@@ -753,23 +699,8 @@ def page_demo():
                 client = load_client()
                 t0 = time.perf_counter()
                 query_vector = model.encode(query, normalize_embeddings=True).tolist()
-                # Los filtros manuales tienen prioridad sobre los detectados.
-                manual = {
-                    "doc_type": doctype or None,
-                    "sex": sexo if sexo != "(cualquiera)" else None,
-                    "min_age": int(edad_min) if edad_min > 0 else None,
-                    "max_age": int(edad_max) if edad_max < 100 else None,
-                    "disease": (
-                        (True if opcion_enf == "Confirmada" else False)
-                        if opcion_enf != "(cualquiera)"
-                        else None
-                    ),
-                    "risk": riesgo_sel if riesgo_sel != "(cualquiera)" else None,
-                }
-                if auto_filtro:
-                    qfilter = parseado.to_filter(**{k: (v if v is not None else UNSET) for k, v in manual.items()})
-                else:
-                    qfilter = build_metadata_filter(**manual)
+                # El filtro lo decide el sistema a partir del texto de la consulta.
+                qfilter = parseado.to_filter() if parseado else None
                 response = client.query_points(
                     collection_name=settings.collection_name,
                     query=query_vector, limit=top_k, query_filter=qfilter,
@@ -783,7 +714,11 @@ def page_demo():
                     st.success(
                         f"✅ Recuperación exitosa en {elapsed_ms:,.0f} ms · {len(ppoints)} fragmentos · "
                         f"colección `{settings.collection_name}` · Top-1 score **{ppoints[0].score:.4f}**"
-                        + (f" · condiciones aplicadas: **{' · '.join(condiciones)}**" if condiciones else "")
+                        + (
+                            f" · restricciones aplicadas: **{' · '.join(parseado.conditions)}**"
+                            if parseado and parseado.conditions
+                            else ""
+                        )
                     )
                     for rank, point in enumerate(ppoints, 1):
                         payload = point.payload or {}
