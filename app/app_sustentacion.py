@@ -11,8 +11,14 @@ import os
 import time
 
 import streamlit as st
+from markdown_it import MarkdownIt  # dependencia garantizada por streamlit
 
 from theme import CUSTOM_CSS, icono
+
+# El fragmento llega con markdown (###, listas) desde Qdrant: renderizado a HTML
+# aquí y con html=False, para que Streamlit vea un bloque HTML continuo (si no,
+# el markdown crudo dentro del <div> se imprime como texto literal).
+_MD = MarkdownIt("commonmark", {"html": False})
 
 st.set_page_config(
     page_title="ACA 1 · RAG Cloud en Salud | Jaime Cabrera",
@@ -543,8 +549,15 @@ def page_demo():
                                 f"<span>dolor <b>{payload.get('chest_pain_label', '—')}</b></span>"
                                 f'<span class="r-riesgo">riesgo <b>{payload.get("risk_level", "—")}</b></span>'
                             )
-                        st.markdown(
-                            f"""
+                        # Una línea en blanco dentro del HTML corta el bloque de markdown
+                        # y el resto (barra, texto) se imprime como código literal:
+                        # clinico vacío dejaba una línea de solo espacios. Se eliminan
+                        # las líneas en blanco para que todo el bloque pase como HTML crudo.
+                        # shortcut: un <pre> con líneas en blanco dentro del chunk se aplana;
+                        # subir a render fragmento a fragmento si algún corpus usa <pre>
+                        card = "\n".join(
+                            ln
+                            for ln in f"""
                             <div class="resultado">
                                 <div class="r-cab">
                                     <span class="r-puesto">PUESTO {rank} · {payload.get('doc_type', '—')}</span>
@@ -555,11 +568,12 @@ def page_demo():
                                     {clinico}
                                 </div>
                                 {barra_similitud(point.score)}
-                                <div class="r-texto">{(payload.get('text') or '')[:2000]}</div>
+                                <div class="r-texto">{_MD.render((payload.get('text') or '')[:2000])}</div>
                             </div>
-                            """,
-                            unsafe_allow_html=True,
+                            """.splitlines()
+                            if ln.strip()
                         )
+                        st.markdown(card, unsafe_allow_html=True)
             except Exception as exc:
                 st.error(f"La conexión con Qdrant Cloud no está disponible desde este entorno: {exc}")
                 st.info("Verifica las variables `QDRANT_URL` / `QDRANT_API_KEY` del `.env`, o ejecuta la app en "

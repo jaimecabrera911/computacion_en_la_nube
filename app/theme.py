@@ -723,6 +723,12 @@ div[data-testid="stAlert"]:has([data-testid="stIconMaterial"]) { border-left-col
     transform: translate(0, 0);
     box-shadow: 1px 1px 0 rgba(28, 31, 29, 0.16);
 }
+/* Streamlit pinta el <p> del label con su gris (rgb 90,97,92) y ese gris
+   gana por especificidad sobre el color del botón: aquí hereda el del botón. */
+.stButton > button p,
+.stDownloadButton > button p {
+    color: inherit !important;
+}
 .stButton > button[kind="secondary"] {
     background: var(--hoja);
     color: var(--azul) !important;
