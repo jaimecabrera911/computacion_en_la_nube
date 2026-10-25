@@ -424,19 +424,16 @@ header[data-testid="stHeader"] { background: transparent; }
     color: var(--tinta-2);
 }
 .resultado .r-meta b { color: var(--tinta); font-weight: 600; }
-/* El texto se apoya sobre las líneas del expediente: es el detalle que ancla
-   toda la metáfora. */
+/* El fragmento llega renderizado como HTML (títulos, listas): sin pre-wrap
+   ni rayado de expediente — con bloques HTML ambos dejaban líneas fantasma
+   en los espacios entre elementos. */
 .resultado .r-texto {
     font-size: 0.86rem;
-    line-height: 29px;
+    line-height: 1.6;
     padding: 0.5rem 1rem 0.7rem;
     color: var(--tinta-2);
-    white-space: pre-wrap;
     max-height: 320px;
     overflow-y: auto;
-    background-image: repeating-linear-gradient(
-        to bottom, transparent 0 28px, rgba(34, 72, 94, 0.10) 28px 29px
-    );
 }
 
 /* ---------- FICHA DE DATOS CLÍNICOS ---------- */
