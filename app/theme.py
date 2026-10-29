@@ -191,6 +191,7 @@ header[data-testid="stHeader"] { background: transparent; }
     line-height: 1.16;
     margin: 0 0 0.7rem 0;
     color: var(--tinta);
+    text-wrap: balance;
 }
 .carpeta h1 em {
     font-style: italic;
@@ -206,31 +207,19 @@ header[data-testid="stHeader"] { background: transparent; }
 .carpeta .firma {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.76rem;
+    line-height: 1.6;
     color: var(--tinta-3);
     letter-spacing: 0.01em;
 }
+.carpeta .firma a {
+    color: var(--azul);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(34, 72, 94, 0.35);
+}
+.carpeta .firma a:hover { border-bottom-color: currentColor; }
 
 /* ---------- SELLO ---------- */
-/* Dos conceptos distintos que conviene no mezclar:
-   .estampado = el sello de goma (borde doble + inclinación), se usa una vez.
-   .sello      = solo el color de tinta roja, para marcar riesgo/severidad. */
-.estampado {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    color: var(--sello);
-    border: 1.5px solid var(--sello);
-    outline: 1px solid var(--sello);
-    outline-offset: 2px;
-    padding: 0.28rem 0.6rem;
-    transform: rotate(-1.6deg);
-    opacity: 0.85;
-    text-transform: uppercase;
-}
+/* .sello = solo el color de tinta roja, para marcar riesgo/severidad. */
 .sello { color: var(--sello); }
 
 /* ---------- CABECERA DE SECCIÓN ---------- */

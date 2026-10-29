@@ -161,8 +161,8 @@ def page_portada():
     st.markdown(
         f"""
         <div class="carpeta">
-            <span class="estampado">Expediente verificado</span>
-            <h1>Sistema RAG Cloud <em>serverless</em> en salud<br>con Qdrant y embeddings abiertos</h1>
+            <h1>Sistema RAG Cloud <em>serverless</em> en salud
+            con Qdrant y embeddings abiertos</h1>
             <div class="entradilla">
                 Pipeline cloud de datos clínicos no estructurados: ingesta multimodal,
                 fragmentación, vectorización semántica y recuperación con alta precisión —
