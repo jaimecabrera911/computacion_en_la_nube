@@ -19,3 +19,10 @@ qdrant_storage/
 
 # Archivos temporales generados por los informes
 output/_tmp_*
+
+# Guiones de sustentación: locales, no se publican
+GUION_3_MINUTOS.md
+GUION_SUSTENTACION_VIDEO.md
+
+# Salidas locales de herramientas
+.ori/

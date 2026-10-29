@@ -21,7 +21,7 @@ from theme import CUSTOM_CSS, icono
 _MD = MarkdownIt("commonmark", {"html": False})
 
 st.set_page_config(
-    page_title="ACA 1 · RAG Cloud en Salud | Jaime Cabrera",
+    page_title="ACA 1 · RAG Cloud en Salud | CUN",
     page_icon="🩺",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -175,8 +175,12 @@ def page_portada():
                 <span><b>Latencia</b> · ~{M['latencia']:.0f} ms</span>
             </div>
             <div class="firma">
-                Jaime A. Cabrera A. — estudiante · Hamilton Rivera Flor — docente ·
-                ACA N° 1 · Computación en la Nube
+                <b>Integrantes:</b> Marcela Ávila Beltrán · Jaime Andrés Cabrera Avendaño ·
+                Cristhian Javier Garzón Jiménez · Johan Smith Valderrama Sánchez<br>
+                Hamilton Rivera Flor — docente · ACA N° 1 · Computación en la Nube<br>
+                <a href="https://github.com/jaimecabrera911/computacion_en_la_nube" target="_blank">
+                    github.com/jaimecabrera911/computacion_en_la_nube
+                </a>
             </div>
         </div>
         """,
