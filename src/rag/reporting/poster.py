@@ -34,7 +34,7 @@ def _chunk_counts_by_document() -> dict[str, int]:
 
 
 def generate_poster_pdf(output_path: str | None = None):
-    """Genera el póster tipo infografía (PDF A4, 3 páginas) con los datos medidos."""
+    """Genera el póster tipo infografía (PDF A4, 2 páginas) con los datos medidos."""
     output_path = output_path or str(settings.output_dir / "Poster_Infografia_ACA1_RAG_Salud.pdf")
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
 
@@ -134,7 +134,7 @@ def generate_poster_pdf(output_path: str | None = None):
         parent=styles['Normal'],
         fontName='Helvetica',
         fontSize=7,
-        leading=9.5,
+        leading=9.0,
         textColor=C_TEXT
     )
 
@@ -158,12 +158,12 @@ def generate_poster_pdf(output_path: str | None = None):
         'RefStyle',
         parent=styles['Normal'],
         fontName='Helvetica',
-        fontSize=6.5,
-        leading=9,
+        fontSize=6.3,
+        leading=8.2,
         textColor=C_MUTED,
         leftIndent=12,
         firstLineIndent=-12,
-        spaceAfter=3
+        spaceAfter=1.5
     )
 
     def make_section_banner(title_text):
@@ -414,12 +414,12 @@ def generate_poster_pdf(output_path: str | None = None):
     if not os.path.exists(chart_img_path):
         chart_img_path = str(settings.output_dir / "similarity_distribution.png")
     if os.path.exists(chart_img_path):
-        story.append(Image(chart_img_path, width=531, height=170))
-    story.append(Spacer(1, 6))
+        story.append(Image(chart_img_path, width=531, height=125))
+    story.append(Spacer(1, 3))
 
     # Bloque 7: Conclusiones, Enlaces Operativos y APA 7
     story.append(make_section_banner("6. Conclusiones Técnicas, Enlaces Operativos y Referencias (Normas APA 7)"))
-    story.append(Spacer(1, 3))
+    story.append(Spacer(1, 2))
 
     latency = summary.get("latency", {})
     latency_typ = latency.get("search_median_ms", latency.get("search_mean_ms"))
@@ -448,7 +448,7 @@ def generate_poster_pdf(output_path: str | None = None):
     else:
         linea_video = (
             "• <b>Video de Sustentación (3-5 min):</b> <font color='#B45309'>"
-            "pendiente de grabar y subir (defina RAG_VIDEO_URL)</font><br/>"
+            "pendiente de grabar y subir</font><br/>"
         )
 
     p_enlaces = Paragraph(

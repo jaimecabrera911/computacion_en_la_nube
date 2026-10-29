@@ -198,10 +198,12 @@ header[data-testid="stHeader"] { background: transparent; }
     color: var(--azul);
 }
 .carpeta .entradilla {
-    font-size: 1rem;
-    line-height: 1.65;
+    font-size: 1.15rem;
+    line-height: 1.55;
     color: var(--tinta-2);
-    max-width: 62ch;
+    /* 90ch ocupa el ancho de la portada en pantallas normales sin volver
+       ilegibles las líneas en monitores ultrawide. */
+    max-width: 90ch;
     margin-bottom: 1.4rem;
 }
 /* Pie de la portada: integrantes y datos del curso en dos columnas */

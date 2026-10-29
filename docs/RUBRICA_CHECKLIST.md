@@ -81,13 +81,14 @@ propio no estructurado de **3 documentos** (Markdown + PDF) en `data/documents/`
 | Diagrama de la arquitectura cloud | ✅ | `output/cloud_rag_architecture.png` embebido en el póster. |
 | Stack tecnológico | ✅ | Tabla de stack con justificación por capa. |
 | Ejemplos de consultas semánticas | ✅ | Bloque 4: las 5 consultas con su filtro y su Top-1 real. |
-| Hipervínculos funcionales | ✅ | Repositorio, documentación, notebook. |
-| PDF en alta resolución | ✅ | ReportLab, imágenes a 300 dpi, tamaño A4 de 2 páginas. |
+| Hipervínculos funcionales | ✅ | Repositorio, documentación y notebook como anotaciones `/URI` reales (verificadas con `pypdf`). El video se enlaza al definir `RAG_VIDEO_URL`. |
+| PDF en alta resolución | ✅ | ReportLab, imágenes a ~480 dpi, tamaño A4 de 2 páginas. |
 | Normas APA 7 | ✅ | Bloque de referencias con formato APA 7. |
 | Consistencia con las métricas reales | ✅ | El póster se genera **leyendo** `output/benchmark_summary.json`; no hay números escritos a mano. |
 
-> ⚠️ **Pendiente de completar por el estudiante:** el enlace al video de sustentación y el enlace
-> público del repositorio deben apuntar a las URLs definitivas antes de la entrega.
+> ⚠️ **Pendiente de completar por el estudiante:** grabar y subir el video de sustentación y
+> regenerar el póster con `RAG_VIDEO_URL=https://... uv run rag poster`. Mientras no exista,
+> el póster muestra el enlace como “pendiente de grabar y subir”.
 
 ---
 
