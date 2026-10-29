@@ -68,7 +68,7 @@ Fuentes (dataset tabular + 3 guías clínicas)
 | # | Entregable | Archivo | Estado |
 |---|---|---|---|
 | 1 | **Notebook técnico reproducible** | [`notebooks/heart_disease_rag_qdrant.ipynb`](notebooks/heart_disease_rag_qdrant.ipynb) | 22 celdas, ejecutado de principio a fin con outputs reales |
-| 2 | **Póster tipo infografía (PDF)** | [`output/Poster_Infografia_ACA1_RAG_Salud.pdf`](output/Poster_Infografia_ACA1_RAG_Salud.pdf) | 2 páginas A4, diagramado, con métricas medidas y APA 7 |
+| 2 | **Póster tipo infografía (PDF)** | [`output/Poster_Infografia_ACA1_RAG_Salud.pdf`](output/Poster_Infografia_ACA1_RAG_Salud.pdf) | 3 páginas A4, diagramado, con métricas medidas, enlaces clicables y APA 7 |
 | 3 | **Video de sustentación (3-5 min)** | Guion en [`GUION_SUSTENTACION_VIDEO.md`](GUION_SUSTENTACION_VIDEO.md) + demo en [`app/app_sustentacion.py`](app/app_sustentacion.py) | Guion cronometrado (4:15); falta grabar y subir el video |
 | 4 | **Documentos complementarios** | [`data/documents/`](data/documents/) | 3 guías clínicas en Markdown y PDF |
 | 5 | **Diagrama y métricas** | [`output/`](output/) | Diagrama de arquitectura, gráficas de similitud y resumen JSON |

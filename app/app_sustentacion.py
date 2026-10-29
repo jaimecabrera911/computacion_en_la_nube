@@ -186,8 +186,8 @@ def page_portada():
                 </div>
                 <div>
                     <div class="rotulo">Curso</div>
-                    <p class="linea-dato">Hamilton Rivera Flor — docente</p>
                     <p class="linea-dato">ACA N° 1 · Computación en la Nube</p>
+                    <p class="linea-dato">Hamilton Rivera Flor — docente</p>
                     <div class="rotulo" style="margin-top:1rem">Repositorio</div>
                     <a href="https://github.com/jaimecabrera911/computacion_en_la_nube"
                        target="_blank" rel="noopener">
@@ -241,18 +241,23 @@ def page_portada():
         unsafe_allow_html=True,
     )
 
-    with st.expander("Descargar entregables en PDF"):
+    with st.expander("Descargar entregables en PDF", expanded=True):
         cols = st.columns(3)
         docs = [
             ("ACA_1_Computacion_Nube_RAG.pdf", "Documento principal"),
-            ("Poster_Infografia_ACA1_RAG_Salud.pdf", "Póster infográfico"),
-            ("Resumen_Resultados_Notebook.pdf", "Resumen de resultados"),
+            ("output/Poster_Infografia_ACA1_RAG_Salud.pdf", "Póster infográfico"),
+            ("output/Resumen_Resultados_Notebook.pdf", "Resumen de resultados"),
         ]
-        for col, (fname, label) in zip(cols, docs):
+        for col, (ruta, label) in zip(cols, docs):
             with col:
-                if os.path.exists(fname):
-                    with open(fname, "rb") as f:
-                        st.download_button(label, f.read(), file_name=fname, width="stretch")
+                if os.path.exists(ruta):
+                    with open(ruta, "rb") as f:
+                        st.download_button(
+                            label,
+                            f.read(),
+                            file_name=os.path.basename(ruta),
+                            width="stretch",
+                        )
 
 
 def page_contexto():

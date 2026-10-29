@@ -34,7 +34,7 @@ def _chunk_counts_by_document() -> dict[str, int]:
 
 
 def generate_poster_pdf(output_path: str | None = None):
-    """Genera el póster tipo infografía (PDF A4, 2 páginas) con los datos medidos."""
+    """Genera el póster tipo infografía (PDF A4, 3 páginas) con los datos medidos."""
     output_path = output_path or str(settings.output_dir / "Poster_Infografia_ACA1_RAG_Salud.pdf")
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
 
@@ -439,12 +439,30 @@ def generate_poster_pdf(output_path: str | None = None):
         body_style
     )
 
+    video_url = os.environ.get("RAG_VIDEO_URL", "").strip()
+    if video_url:
+        linea_video = (
+            "• <b>Video de Sustentación (3-5 min):</b> "
+            f"<link href='{video_url}' color='#1A5F7A'><u>{video_url}</u></link><br/>"
+        )
+    else:
+        linea_video = (
+            "• <b>Video de Sustentación (3-5 min):</b> <font color='#B45309'>"
+            "pendiente de grabar y subir (defina RAG_VIDEO_URL)</font><br/>"
+        )
+
     p_enlaces = Paragraph(
         "<b>Enlaces Operativos Oficiales:</b><br/>"
-        "• <b>Repositorio GitHub:</b> <font color='#1A5F7A'><u>https://github.com/jaimeacabreraa/computacion_en_la_nube</u></font><br/>"
-        "• <b>Video de Sustentación (3-5 min):</b> <font color='#1A5F7A'><u>https://youtu.be/sustentacion-aca1-rag-salud</u></font><br/>"
-        "• <b>Documentación del proyecto:</b> <font color='#1A5F7A'><u>docs/EXPLICACION_SUSTENTACION.md</u></font><br/>"
-        "• <b>Notebook Reproducible:</b> <font color='#1A5F7A'><u>notebooks/heart_disease_rag_qdrant.ipynb</u></font>",
+        "• <b>Repositorio GitHub:</b> "
+        "<link href='https://github.com/jaimecabrera911/computacion_en_la_nube' color='#1A5F7A'><u>"
+        "https://github.com/jaimecabrera911/computacion_en_la_nube</u></link><br/>"
+        + linea_video
+        + "• <b>Documentación del proyecto:</b> "
+        "<link href='https://github.com/jaimecabrera911/computacion_en_la_nube/blob/master/docs/EXPLICACION_SUSTENTACION.md' color='#1A5F7A'><u>"
+        "docs/EXPLICACION_SUSTENTACION.md</u></link><br/>"
+        "• <b>Notebook Reproducible:</b> "
+        "<link href='https://github.com/jaimecabrera911/computacion_en_la_nube/blob/master/notebooks/heart_disease_rag_qdrant.ipynb' color='#1A5F7A'><u>"
+        "notebooks/heart_disease_rag_qdrant.ipynb</u></link>",
         body_style
     )
 
