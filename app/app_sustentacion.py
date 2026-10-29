@@ -174,13 +174,26 @@ def page_portada():
                 <span><b>Costo</b> · $0.00 USD</span>
                 <span><b>Latencia</b> · ~{M['latencia']:.0f} ms</span>
             </div>
-            <div class="firma">
-                <b>Integrantes:</b> Marcela Ávila Beltrán · Jaime Andrés Cabrera Avendaño ·
-                Cristhian Javier Garzón Jiménez · Johan Smith Valderrama Sánchez<br>
-                Hamilton Rivera Flor — docente · ACA N° 1 · Computación en la Nube<br>
-                <a href="https://github.com/jaimecabrera911/computacion_en_la_nube" target="_blank">
-                    github.com/jaimecabrera911/computacion_en_la_nube
-                </a>
+            <div class="portada-pie">
+                <div>
+                    <div class="rotulo">Integrantes</div>
+                    <ul class="integrantes">
+                        <li>Marcela Ávila Beltrán</li>
+                        <li>Jaime Andrés Cabrera Avendaño</li>
+                        <li>Cristhian Javier Garzón Jiménez</li>
+                        <li>Johan Smith Valderrama Sánchez</li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="rotulo">Curso</div>
+                    <p class="linea-dato">Hamilton Rivera Flor — docente</p>
+                    <p class="linea-dato">ACA N° 1 · Computación en la Nube</p>
+                    <div class="rotulo" style="margin-top:1rem">Repositorio</div>
+                    <a href="https://github.com/jaimecabrera911/computacion_en_la_nube"
+                       target="_blank" rel="noopener">
+                        github.com/jaimecabrera911/computacion_en_la_nube <span aria-hidden="true">↗</span>
+                    </a>
+                </div>
             </div>
         </div>
         """,

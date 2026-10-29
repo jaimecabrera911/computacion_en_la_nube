@@ -126,7 +126,7 @@ html, body, [class*="css"], .stApp {
     letter-spacing: -0.012em;
 }
 .stApp .dato-num, .stApp .r-meta, .stApp .r-puesto,
-.stApp .lectura span, .stApp .firma, .stApp .datos-clinicos,
+.stApp .lectura span, .stApp .datos-clinicos,
 .stApp .seccion-cabecera .marca, .stApp .seccion-cabecera .etiqueta,
 .stApp .pie-indice, .stApp .marca-app .t2, .stApp .dato-lbl {
     font-family: 'IBM Plex Mono', ui-monospace, monospace;
@@ -204,19 +204,49 @@ header[data-testid="stHeader"] { background: transparent; }
     max-width: 62ch;
     margin-bottom: 1.4rem;
 }
-.carpeta .firma {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.76rem;
-    line-height: 1.6;
-    color: var(--tinta-3);
-    letter-spacing: 0.01em;
+/* Pie de la portada: integrantes y datos del curso en dos columnas */
+.carpeta .portada-pie {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 1.6rem;
+    border-top: 1px solid var(--regla);
+    padding-top: 1.1rem;
 }
-.carpeta .firma a {
+.carpeta .rotulo {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tinta-3);
+    margin-bottom: 0.4rem;
+}
+.carpeta .integrantes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--tinta-2);
+}
+.carpeta .linea-dato {
+    margin: 0 0 0.15rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--tinta-2);
+}
+.carpeta .portada-pie a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
     color: var(--azul);
     text-decoration: none;
     border-bottom: 1px solid rgba(34, 72, 94, 0.35);
+    overflow-wrap: anywhere;
 }
-.carpeta .firma a:hover { border-bottom-color: currentColor; }
+.carpeta .portada-pie a:hover { border-bottom-color: currentColor; }
+@media (max-width: 760px) {
+    .carpeta .portada-pie { grid-template-columns: 1fr; }
+}
 
 /* ---------- SELLO ---------- */
 /* .sello = solo el color de tinta roja, para marcar riesgo/severidad. */
