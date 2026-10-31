@@ -784,6 +784,37 @@ section[data-testid="stExpander"] summary { font-family: 'IBM Plex Sans', sans-s
 .stTabs [data-baseweb="tab-list"] { gap: 0.2rem; }
 .stTabs [data-baseweb="tab"] { font-family: 'IBM Plex Sans', sans-serif; }
 
+/* ---------- CHAT DEL AGENTE ---------- */
+/* Cada mensaje es una hoja del expediente: el agente escribe en azul, el
+   usuario en tinta de sello. */
+[data-testid="stChatMessage"] {
+    background: var(--hoja);
+    border: 1px solid var(--regla);
+    border-left: 3px solid var(--regla);
+    border-radius: 2px;
+    box-shadow: var(--sombra-copia);
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 0.9rem;
+}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
+    border-left-color: var(--azul);
+}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    background: var(--papel);
+    border-left-color: var(--sello);
+}
+[data-testid="stChatMessage"] .resultado { margin-bottom: 0.25rem; }
+[data-testid="stChatInput"] {
+    background: var(--hoja) !important;
+    border: 1px solid var(--regla) !important;
+    border-radius: 2px !important;
+    box-shadow: inset 2px 0 0 var(--azul);
+}
+[data-testid="stChatInput"] textarea {
+    color: var(--tinta) !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+}
+
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-thumb { background: rgba(34, 72, 94, 0.30); }
 ::-webkit-scrollbar-track { background: transparent; }
