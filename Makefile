@@ -6,7 +6,7 @@
 #   make ask      → abre la consola interactiva de consultas
 #
 .DEFAULT_GOAL := help
-.PHONY: help setup pipeline evaluate ask chat queries test notebook notebook-report poster summary-pdf diagram corpus-pdf report demo clean
+.PHONY: help setup pipeline evaluate ask chat queries test notebook notebook-report poster summary-pdf diagram corpus-pdf report demo slides clean
 
 help: ## Muestra esta ayuda
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -55,6 +55,9 @@ report: ## Regenera docs/RESULTADOS.md con las métricas medidas
 
 demo: ## Levanta la app web de sustentación (Streamlit)
 	uv run streamlit run app/app_sustentacion.py
+
+slides: ## Levanta la presentación interactiva en Reveal.js
+	python3 -m http.server 8080 --directory presentacion
 
 clean: ## Elimina artefactos temporales (no toca los entregables)
 	find . -path ./.venv -prune -o -name '__pycache__' -type d -print0 | xargs -0 rm -rf

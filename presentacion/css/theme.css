@@ -1,0 +1,325 @@
+/* ==========================================================================
+   Tema Clínico-Tecnológico para Reveal.js
+   Proyecto: Arquitectura RAG Cloud Serverless en Salud
+   ========================================================================== */
+
+:root {
+  --navy: #0b2b4a;
+  --navy-2: #123a5c;
+  --ink: #17324d;
+  --muted: #55677a;
+  --green: #22b573;
+  --green-dark: #128a5a;
+  --green-soft: #a9e8cd;
+  --accent: #2ec98c;
+  --line: #b9c7d2;
+  --paper: #f1f4f6;
+  --bg-dark: #0a1726;
+  --bg-slide: linear-gradient(150deg, #f7f9fa 0%, #eef2f5 45%, #e9eef2 100%);
+  --shadow-slide: 0 25px 65px rgba(5, 18, 34, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg-dark);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base Reveal Overrides */
+.reveal {
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal .slides section {
+  width: 1376px !important;
+  height: 768px !important;
+  top: 0 !important;
+  left: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+  background: var(--bg-slide);
+  border-radius: 8px;
+  box-shadow: var(--shadow-slide);
+}
+
+/* Reset typography inside reveal so custom titles are not ruined */
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  text-transform: none;
+  font-family: "Poppins", sans-serif;
+  letter-spacing: normal;
+  margin: 0;
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.reveal p,
+.reveal span,
+.reveal div,
+.reveal li {
+  text-transform: none;
+}
+
+.reveal a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.reveal img {
+  max-width: none;
+  max-height: none;
+  border: none;
+  box-shadow: none;
+}
+
+.reveal ul,
+.reveal ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Controls & Progress bar */
+.reveal .progress {
+  height: 6px;
+  background: rgba(11, 43, 74, 0.4);
+  color: var(--green);
+  z-index: 50;
+}
+
+.reveal .progress span {
+  background: linear-gradient(90deg, #128a5a 0%, #22b573 50%, #43e0a4 100%);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 12px rgba(46, 201, 140, 0.7);
+}
+
+.reveal .controls {
+  color: var(--green);
+}
+
+.reveal .controls button:hover {
+  color: #43e0a4;
+}
+
+.reveal .slide-number {
+  background: rgba(11, 43, 74, 0.85);
+  backdrop-filter: blur(8px);
+  color: #eaf8f2;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+  border: 1px solid rgba(46, 201, 140, 0.35);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  right: 18px;
+  bottom: 18px;
+}
+
+/* Overview mode styling */
+.reveal.overview .slides section {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(46, 201, 140, 0.3);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.reveal.overview .slides section:hover {
+  border-color: var(--green);
+  box-shadow: 0 14px 35px rgba(46, 201, 140, 0.25);
+}
+
+/* ==========================================================================
+   Floating Presentation HUD (Header & Toolbar)
+   ========================================================================== */
+.presentation-hud {
+  position: fixed;
+  top: 14px;
+  left: 20px;
+  right: 20px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: rgba(9, 23, 38, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  z-index: 100;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.presentation-hud:hover {
+  background: rgba(9, 23, 38, 0.92);
+}
+
+.hud-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hud-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.hud-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(34, 181, 115, 0.15);
+  border: 1px solid rgba(34, 181, 115, 0.4);
+  color: #43e0a4;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.hud-slide-title {
+  color: #9ab3c7;
+  font-size: 13px;
+  font-weight: 500;
+  margin-left: 8px;
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .hud-slide-title { display: inline-block; }
+}
+
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  color: #d8e5f0;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hud-btn:hover {
+  background: rgba(46, 201, 140, 0.2);
+  border-color: var(--green);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.hud-btn:active {
+  transform: translateY(0);
+}
+
+.hud-btn svg {
+  stroke-width: 2.2;
+}
+
+/* Shortcuts Modal */
+.shortcuts-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 14, 24, 0.82);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.shortcuts-modal.open {
+  display: flex;
+}
+
+.shortcuts-card {
+  width: 480px;
+  max-width: 90vw;
+  background: #0f2338;
+  border: 1px solid rgba(46, 201, 140, 0.35);
+  border-radius: 16px;
+  padding: 24px 28px;
+  color: #e2edf6;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.shortcuts-card h3 {
+  color: #ffffff;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shortcuts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 13.5px;
+}
+
+.shortcut-row kbd {
+  background: #193855;
+  border: 1px solid #2e557b;
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-family: monospace;
+  font-size: 12px;
+  color: #43e0a4;
+  box-shadow: 0 2px 0 #10263c;
+}

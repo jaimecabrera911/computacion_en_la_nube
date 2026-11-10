@@ -1,0 +1,21 @@
+{
+  "name": "presentacion-rag-serverless-salud",
+  "version": "1.0.0",
+  "description": "Presentación interactiva en Reveal.js para la sustentación de la Arquitectura RAG Cloud Serverless en Salud",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "serve": "python3 -m http.server 8080",
+    "dev": "npx --yes serve . -l 8080"
+  },
+  "keywords": [
+    "revealjs",
+    "presentation",
+    "rag",
+    "qdrant",
+    "healthcare",
+    "serverless"
+  ],
+  "author": "Jaime Andrés Cabrera Avendaño, Cristhian Javier Garzón Jiménez, Johan Smith Valderrama Sánchez, Marcela Ávila Beltrán",
+  "license": "MIT"
+}

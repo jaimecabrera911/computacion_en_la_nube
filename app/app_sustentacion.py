@@ -1,17 +1,17 @@
 """Agente RAG clínico — demo en vivo contra Qdrant Cloud.
 
 Interfaz única de la app: un chat. El agente interpreta la consulta, aplica
-los filtros de metadatos que detecta y responde citando los fragmentos reales
-recuperados del clúster. Sin LLM de generación: la respuesta es extractiva,
-por eso el costo sigue siendo $0.00. El diseño vive en `app/theme.py`.
+los filtros de metadatos que detecta, recupera los fragmentos reales del
+clúster y el modelo generativo remoto redacta una única respuesta natural
+y estructurada. Los fragmentos crudos quedan colapsados como fuentes
+verificables. El diseño vive en `app/theme.py`.
 """
-
-import time
 
 import streamlit as st
 from markdown_it import MarkdownIt  # dependencia garantizada por streamlit
 
 from rag.config import settings
+from rag.generator import generar_respuesta
 from rag.query_parser import parse_query
 from rag.vector_store import get_qdrant_client, semantic_search
 from theme import CUSTOM_CSS, icono
@@ -90,41 +90,61 @@ def tarjeta(rank: int, hit: dict) -> str:
 
 def responder(pregunta: str) -> dict:
     """Consulta el clúster y devuelve el mensaje del agente ya renderizable."""
+    # Contexto conversacional: turnos previos (sin el prompt actual) para
+    # seguir conversando. La búsqueda semántica se ayuda de la pregunta
+    # anterior cuando el seguimiento es corto o anafórico.
+    previos = st.session_state.mensajes[:-1]
+    historial = []
+    for m in previos:
+        if m["role"] == "user":
+            historial.append({"role": "user", "content": m["content"]})
+        elif m.get("texto"):
+            historial.append({"role": "assistant", "content": m["texto"]})
+    pregunta_anterior = next(
+        (m["content"] for m in reversed(previos) if m["role"] == "user"), ""
+    )
+    consulta_busqueda = (
+        f"{pregunta_anterior} {pregunta}".strip() if pregunta_anterior else pregunta
+    )
+
     parseado = parse_query(pregunta)
-    inicio = time.perf_counter()
     hits = semantic_search(
         cliente(),
         modelo(),
-        pregunta,
+        consulta_busqueda,
         collection_name=settings.collection_name,
         limit=TOP_K,
         query_filter=parseado.to_filter(),
     )
-    ms = (time.perf_counter() - inicio) * 1000
 
     if not hits:
         return {
             "role": "assistant",
-            "html": '<div class="lead">No encontré fragmentos para esa consulta con las '
+            "html": '<div class="lead">No encontré información para esa consulta con las '
                     "restricciones detectadas. Intenta reformularla o quitar el filtro "
                     "implícito (edad, sexo, diagnóstico).</div>",
         }
 
-    chips = "".join(f'<span class="sello">{c}</span>' for c in parseado.conditions)
-    encabezado = (
-        f'<div class="lectura"><span>{len(hits)} fuentes recuperadas · '
-        f"{ms:,.0f} ms</span>{chips}</div>"
-    )
-    nota = (
-        "<p class='lead'>Fragmento más afín a tu pregunta. Restricciones aplicadas "
-        f"automáticamente: <b>{' · '.join(parseado.conditions)}</b>.</p>"
-        if parseado.conditions
-        else "<p class='lead'>Fragmento más afín a tu pregunta por similitud semántica.</p>"
-    )
+    # PASO generativo: el modelo remoto redacta UNA sola respuesta natural y
+    # estructurada a partir de los fragmentos recuperados. Sin fallback
+    # extractivo: si la API falla se muestra un error claro y listo.
+    try:
+        respuesta = generar_respuesta(pregunta, hits, historial=historial)
+    except Exception as exc:
+        return {
+            "role": "assistant",
+            "html": (
+                "<div class='lead'>El modelo generativo no pudo redactar la "
+                f"respuesta ahora mismo ({exc}). Reintenta la consulta.</div>"
+            ),
+        }
+
+    cuerpo = f'<div class="r-texto r-respuesta">{_MD.render(respuesta)}</div>'
     return {
         "role": "assistant",
-        "html": encabezado + nota + tarjeta(1, hits[0]),
-        "fuentes": [tarjeta(i, hit) for i, hit in enumerate(hits[1:], 2)],
+        "html": cuerpo,
+        "texto": respuesta,
+        "fuentes": [tarjeta(i, hit) for i, hit in enumerate(hits, 1)],
     }
 
 
@@ -170,8 +190,9 @@ def barra_lateral():
             <div class="pie-indice">
                 <b>Corpus</b> · 303 historias UCI Heart Disease + 3 guías clínicas<br>
                 <b>Índice</b> · Qdrant Cloud (AWS) · SBERT 384-d<br>
-                <b>Agente</b> · recupera y cita fragmentos reales; no redacta con un LLM,
-                así que el costo sigue en $0.00
+                <b>Agente</b> · recupera fragmentos reales y los sintetiza con
+                {settings.generative_model_name} (API remota) en una única
+                respuesta natural y estructurada
             </div>
             """,
             unsafe_allow_html=True,
@@ -188,7 +209,7 @@ def main():
 
     if prompt:
         st.session_state.mensajes.append({"role": "user", "content": prompt})
-        with st.spinner("Vectorizando la consulta y buscando en Qdrant Cloud..."):
+        with st.spinner("Buscando en Qdrant Cloud y redactando la respuesta con el modelo generativo..."):
             try:
                 st.session_state.mensajes.append(responder(prompt))
             except Exception as exc:
@@ -207,7 +228,7 @@ def main():
             else:
                 st.markdown(mensaje["html"], unsafe_allow_html=True)
                 if mensaje.get("fuentes"):
-                    with st.expander(f"Ver las {len(mensaje['fuentes'])} fuentes restantes"):
+                    with st.expander(f"Ver las {len(mensaje['fuentes'])} fuentes"):
                         st.markdown("".join(mensaje["fuentes"]), unsafe_allow_html=True)
 
     if not st.session_state.mensajes:

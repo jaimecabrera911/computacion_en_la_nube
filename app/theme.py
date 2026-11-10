@@ -456,6 +456,17 @@ header[data-testid="stHeader"] { background: transparent; }
     max-height: 320px;
     overflow-y: auto;
 }
+/* La respuesta del agente es texto corrido: sin caja de scroll ni tope de
+   altura — ese límite es solo para las tarjetas de fragmento de fuente. */
+.r-texto.r-respuesta {
+    max-height: none;
+    overflow: visible;
+    font-size: 0.95rem;
+    line-height: 1.72;
+    padding: 0.45rem 0 0.2rem;
+}
+.r-texto.r-respuesta p { margin: 0 0 0.7rem 0; }
+.r-texto.r-respuesta p:last-child { margin-bottom: 0; }
 
 /* ---------- FICHA DE DATOS CLÍNICOS ---------- */
 .datos-clinicos {

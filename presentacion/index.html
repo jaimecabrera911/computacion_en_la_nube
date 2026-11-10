@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Arquitectura RAG Cloud Serverless en Salud — Reveal.js</title>
+
+  <!-- Google Fonts: Inter y Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Reveal.js Core Styles -->
+  <link rel="stylesheet" href="vendor/reveal.js/dist/reset.css">
+  <link rel="stylesheet" href="vendor/reveal.js/dist/reveal.css">
+
+  <!-- Custom Presentation Styles -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+
+  <!-- Floating HUD Header & Navigation -->
+  <header class="presentation-hud" id="presentation-hud">
+    <div class="hud-left">
+      <div class="hud-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22b573" stroke-width="2.2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span>RAG Cloud Salud</span>
+      </div>
+      <span class="hud-badge">Serverless</span>
+      <span class="hud-slide-title" id="hud-slide-title">01 · Portada Institucional</span>
+    </div>
+    <div class="hud-right">
+      <button class="hud-btn" id="btn-overview" title="Vista General (Tecla: O o ESC)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Overview</span>
+      </button>
+      <button class="hud-btn" id="btn-notes" title="Modo Ponente con notas (Tecla: S)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Notas</span>
+      </button>
+      <button class="hud-btn" id="btn-fullscreen" title="Pantalla Completa (Tecla: F)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        <span>Full</span>
+      </button>
+      <button class="hud-btn" id="btn-help" title="Atajos de Teclado (Tecla: ?)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Reveal.js Presentation Container -->
+  <div class="reveal">
+    <div class="slides">
+<section class="slide s-cover" id="portada">
+  <img class="hero" src="assets/s1-hero.png" alt="Corazón anatómico digital conectado a servidores en la nube">
+  <svg class="ecg" style="left:0;top:150px;width:70px;height:90px" viewBox="0 0 70 90" fill="none">
+    <path d="M0 52h14l5-14 7 32 8-50 7 32h29" stroke="#2fbf86" stroke-width="1.6"/>
+  </svg>
+  <h1 class="cover-title">Arquitectura RAG<br>Cloud Serverless<br>en Salud</h1>
+  <p class="cover-sub">Ingesta de datos clínicos,<br>vectorización e indexación<br>semántica</p>
+
+  <div class="authors">
+    <div class="author">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17324d" stroke-width="1.3"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="12" cy="18" r="2"/><path d="M8 6h8M7 8l4 8M17 10l-4 6"/></svg>
+      <span>Jaime Andrés<br>Cabrera Avendaño</span>
+    </div>
+    <div class="author">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17324d" stroke-width="1.3"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.4-6 8-6s6.5 2 8 6"/></svg>
+      <span>Cristhian Javier<br>Garzón Jiménez</span>
+    </div>
+    <div class="author">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17324d" stroke-width="1.3"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.4-6 8-6s6.5 2 8 6"/></svg>
+      <span>Johan Smith<br>Valderrama Sánchez</span>
+    </div>
+    <div class="author">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17324d" stroke-width="1.3"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 9h6M9 13h4"/></svg>
+      <span>Marcela<br>Ávila Beltrán</span>
+    </div>
+  </div>
+
+  <div class="cover-badges">
+    <div class="cover-badge">Especialización en<br>Inteligencia Artificial</div>
+    <div class="cover-badge small">Computación en la Nube<br><span>(Docente: Hamilton Rivera Flor)</span>| Proyecto ACA N° 1</div>
+  </div>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 0:00 - 0:25</b><br>
+• Saludo institucional y presentación del equipo.<br>
+• Proyecto de la Especialización en Inteligencia Artificial (ACA N° 1).<br>
+• Título: Arquitectura RAG Cloud Serverless en Salud cardiológica.<br>
+• Destacar el enfoque: Ingesta clínica, vectorización densa y despliegue serverless a costo cero.
+</aside>
+</section>
+
+<section class="slide s2" id="problema">
+  <div class="frame"></div>
+  <div class="divider"></div>
+  <div class="brand" style="left:55px;top:14px">THE DIGITAL PULSE
+    <svg width="52" height="26" viewBox="0 0 52 26" fill="none"><path d="M0 15h12l4-10 5 19 6-25 5 16h20" stroke="#17324d" stroke-width="1.6"/></svg>
+  </div>
+
+  <img class="folders" src="assets/s2-folders.png" alt="Pila de historias clínicas en papel con un cronómetro">
+  <p class="question">¿Cómo estructurar datos clínicos no estructurados para recuperación semántica precisa, con baja latencia y costo cero?</p>
+
+  <img class="target" src="assets/s2-target.png" alt="Diana con una flecha en el centro">
+  <p class="goal">Diseñar y desplegar un sistema<br>RAG serverless de alto rendimiento.</p>
+
+  <img class="mini" style="left:735px" src="assets/s2-icon-1.png" alt="">
+  <p class="mini-cap" style="left:735px">Integración de 303 registros clínicos tabulares.</p>
+  <img class="mini" style="left:881px" src="assets/s2-icon-2.png" alt="">
+  <p class="mini-cap" style="left:881px">Fusión con 3 guías de práctica clínica cardiológica.</p>
+  <img class="mini" style="left:1021px" src="assets/s2-icon-3.png" alt="">
+  <p class="mini-cap" style="left:1021px">Latencias operativas inferiores a 150 ms.</p>
+  <img class="mini" style="left:1163px" src="assets/s2-icon-4.png" alt="">
+  <p class="mini-cap" style="left:1163px">Costo de infraestructura: $0.00 USD permanente.</p>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 0:25 - 0:50</b><br>
+• Pregunta de investigación: ¿Cómo consultar datos clínicos con rigor médico, baja latencia y costo cero?<br>
+• Objetivo: Desplegar un sistema RAG serverless de alto rendimiento.<br>
+• Hitos clave: 303 historias clínicas, 3 guías de práctica clínica, latencia &lt; 150 ms y costo permanente $0.00 USD.
+</aside>
+</section>
+
+<section class="slide s3" id="ecosistema">
+  <div class="deco-lines"></div>
+  <div class="frame"></div>
+  <div class="brand" style="left:55px;top:14px">THE DIGITAL PULSE
+    <svg width="52" height="26" viewBox="0 0 52 26" fill="none"><path d="M0 15h12l4-10 5 19 6-25 5 16h20" stroke="#17324d" stroke-width="1.6"/></svg>
+  </div>
+  <h1 class="slide-title" style="left:0;top:62px;width:1376px;text-align:center;font-size:46px">El Ecosistema de Datos Clínicos</h1>
+
+  <article class="dataset" style="left:108px">
+    <h3>Dataset Base</h3>
+    <p class="sub">(UCI Heart Disease)</p>
+    <div class="rule"></div>
+    <p><b>Formato:</b> Tabular / CSV a viñetas narrativas estructuradas.<br>
+       <b>Volumen:</b> 303 pacientes, 14 variables (edad, dolor torácico, ECG, colesterol, etc.).</p>
+  </article>
+
+  <article class="dataset" style="left:414px">
+    <h3>Guía Clínica 01</h3>
+    <p class="sub">(MinSalud / OPS / OMS)</p>
+    <div class="rule"></div>
+    <p><b>Formato:</b> Markdown &amp; PDF (15 chunks).<br>
+       <b>Contenido:</b> Clasificación semiológica de dolor torácico y factores de riesgo.</p>
+  </article>
+
+  <article class="dataset" style="left:733px">
+    <h3>Protocolo 02</h3>
+    <p class="sub">(ACC / AHA Guidelines)</p>
+    <div class="rule"></div>
+    <p><b>Formato:</b> Markdown &amp; PDF (18 chunks).<br>
+       <b>Contenido:</b> Criterios de ergometría, depresión del segmento ST y perfusión SPECT.</p>
+  </article>
+
+  <article class="dataset" style="left:1050px">
+    <h3>Protocolo 03</h3>
+    <p class="sub">(ESC / OMS Guidelines)</p>
+    <div class="rule"></div>
+    <p><b>Formato:</b> Markdown &amp; PDF (13 chunks).<br>
+       <b>Contenido:</b> Metas de c-LDL y doble antiagregación plaquetaria.</p>
+  </article>
+
+  <img class="diagram" src="assets/s3-diagram.png" alt="Cuatro bases de datos clínicas alimentando el corpus documental integrado">
+  <div class="ghost funnel-text" aria-hidden="true">Corpus<br>Documental<br>Integrado</div>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 0:50 - 1:20</b><br>
+• Fusión de dos naturalezas de datos:<br>
+  1) Tabular: UCI Heart Disease (303 registros, 14 atributos clínicos) convertido a viñetas narrativas.<br>
+  2) No estructurado: 3 Guías de práctica clínica (MinSalud/OPS, ACC/AHA y ESC) con 46 chunks.<br>
+• Resultado: Corpus documental integrado de 349 fragmentos clínicos.
+</aside>
+</section>
+
+<section class="slide s4" id="motor">
+  <div class="deco-lines"></div>
+  <div class="frame"></div>
+  <div class="brand" style="left:70px;top:22px">THE DIGITAL PULSE
+    <svg width="52" height="26" viewBox="0 0 52 26" fill="none"><path d="M0 15h12l4-10 5 19 6-25 5 16h20" stroke="#17324d" stroke-width="1.6"/></svg>
+  </div>
+  <h1 class="slide-title" style="left:70px;top:100px;font-size:43px">El Motor RAG: Flujo de Ingesta y Recuperación Semántica</h1>
+
+  <div class="pipeline">
+    <span class="pipeline-label">Pipeline Journey</span>
+    <span class="dot" style="left:228px"></span>
+    <span class="dot" style="left:1008px"></span>
+  </div>
+  <div class="cap" style="left:268px">Ingesta</div>
+  <div class="cap" style="left:1048px">Búsqueda</div>
+
+  <div class="flow-arrow" style="left:238px"></div>
+  <div class="flow-label" style="left:256px">Transform</div>
+  <div class="flow-arrow" style="left:502px"></div>
+  <div class="flow-label" style="left:520px">Vectorize</div>
+  <div class="flow-arrow" style="left:738px"></div>
+  <div class="flow-label" style="left:760px">Batch Upsert</div>
+  <div class="flow-arrow" style="left:998px"></div>
+  <div class="flow-label" style="left:1014px">Semantic Query</div>
+
+  <img class="ill ill-1" src="assets/s4-1.png" alt="Historia clínica junto a un estetoscopio">
+  <img class="ill ill-2" src="assets/s4-2.png" alt="Documentos clínicos fragmentados">
+  <img class="ill ill-3" src="assets/s4-3.png" alt="Espacio vectorial de embeddings">
+  <img class="ill ill-4" src="assets/s4-4.png" alt="Clúster gestionado en la nube">
+  <img class="ill ill-5" src="assets/s4-5.png" alt="Búsqueda semántica con lupa">
+
+  <div class="step" style="left:95px;width:205px">1. Ingesta Multimodal</div>
+  <div class="step" style="left:330px;width:215px">2. Chunking &amp; Metadatos</div>
+  <div class="step" style="left:580px;width:218px">3. Embeddings Vectoriales</div>
+  <div class="step" style="left:852px;width:205px">4. Qdrant Cloud</div>
+  <div class="step" style="left:1108px;width:190px">5. Búsqueda RAG</div>
+
+  <div class="step-card" style="left:70px;width:232px">
+    <b>Transformación de CSV y Guías Clínicas.</b>
+    <ul><li>UCI Heart Disease (303 pacientes, 14 atributos)</li><li>3 Guías Clínicas (PDF/MD).</li></ul>
+  </div>
+  <div class="step-card" style="left:315px;width:218px">
+    <b>Generación de viñetas estructuradas.</b>
+    <ul><li>RecursiveCharacterTextSplitter (chunk_size=512, overlap=64)</li><li>349 fragmentos totales.</li></ul>
+  </div>
+  <div class="step-card" style="left:565px;width:220px">
+    <b>Vectorización de alta densidad, Batch Upsert.</b>
+    <ul><li>multilingual-MiniLM-L12</li><li>Dense 384-d latent space</li><li>Normalización L2 (Dot-Cosine).</li></ul>
+  </div>
+  <div class="step-card" style="left:845px;width:205px">
+    <b>Clúster Serverless Managed.</b>
+    <ul><li>Colección: clinical_heart_disease_rag</li><li>Métrica: Cosine Distance (HNSW).</li></ul>
+  </div>
+  <div class="step-card" style="left:1105px;width:192px">
+    <b>Consulta Semántica, Payload Filtering Estricto.</b>
+    <ul><li>Top-k Ranking (k=3, 5)</li><li>Inferencia Diagnóstica.</li></ul>
+  </div>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 1:20 - 1:55</b><br>
+• Explicar el viaje en 5 pasos:<br>
+  1. Ingesta multimodal (CSV + Guías MD/PDF).<br>
+  2. Chunking inteligente (512 caracteres, 64 solapamiento).<br>
+  3. Embeddings con multilingual-MiniLM-L12 (384 dimensiones, normalización L2).<br>
+  4. Qdrant Cloud Serverless en AWS ca-central-1 con distancia coseno e índices HNSW.<br>
+  5. Búsqueda semántica con filtrado estricto por metadatos (Payload Filtering).
+</aside>
+</section>
+
+<section class="slide s5" id="stack">
+  <div class="deco-lines"></div>
+  <div class="frame"></div>
+  <h1 class="slide-title" style="left:65px;top:64px;font-size:44px">Stack Tecnológico y Estrategia de Fragmentación</h1>
+
+  <article class="tech" style="left:60px;top:150px">
+    <img src="assets/s5-python.png" width="169" height="166" alt="Terminal de Python">
+    <div>
+      <h3>uv (Astral) + Python 3.12</h3>
+      <p>Entorno virtual hermético (.venv), instalación en sub-segundos y portabilidad total multiplataforma.</p>
+    </div>
+  </article>
+
+  <article class="tech" style="left:705px;top:150px">
+    <img src="assets/s5-qdrant.png" width="178" height="179" alt="Nube con un cubo vectorial">
+    <div>
+      <h3>Qdrant Cloud Serverless</h3>
+      <p>AWS ca-central-1. Free Tier permanente (1GB). Soporte nativo para índices de payload y métrica de Distancia Coseno (HNSW).</p>
+    </div>
+  </article>
+
+  <article class="tech" style="left:60px;top:420px">
+    <img src="assets/s5-neural.png" width="192" height="186" alt="Red neuronal">
+    <div>
+      <h3>paraphrase-multilingual-<br>MiniLM-L12-v2</h3>
+      <p>384 dimensiones latentes, normalización L2. Cero costo de API y alta densidad semántica.</p>
+    </div>
+  </article>
+
+  <article class="tech" style="left:705px;top:420px">
+    <img src="assets/s5-scissors.png" width="170" height="168" alt="Documento cortado con tijeras">
+    <div>
+      <h3>RecursiveCharacterTextSplitter</h3>
+      <p>Tamaño de bloque 512, solapamiento 64 (~12%). Preservación perfecta del contexto clínico en fronteras sin exceder la ventana de tokens.</p>
+    </div>
+  </article>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 1:55 - 2:25</b><br>
+• Justificación técnica del stack:<br>
+  - uv + Python 3.12: entorno virtual hermético y reproducible en sub-segundos.<br>
+  - Qdrant Cloud: clúster gestionado serverless en capa gratuita permanente (1GB).<br>
+  - MiniLM-L12 local: cero latencia de red en embedding y cero costo de inferencia por token.<br>
+  - RecursiveSplitter: preserva la continuidad contextual médica sin fragmentar entidades clínicas.
+</aside>
+</section>
+
+<section class="slide s6" id="pruebas">
+  <div class="deco-lines"></div>
+  <div class="frame"></div>
+  <h1 class="slide-title" style="left:80px;top:56px;font-size:44px">Batería de Pruebas: Evaluación Semántica en Tiempo Real</h1>
+  <img class="magnifier" src="assets/s6-magnifier.png" alt="Lupa sobre una señal electrocardiográfica">
+
+  <div class="panel"></div>
+  <p class="intro">Para validar el rendimiento clínico de la arquitectura, sometimos el motor a 5 escenarios progresivos de estrés cognitivo (Q1-Q5).</p>
+
+  <div class="callout">
+    <div class="callout-tab">
+      <svg width="22" height="20" viewBox="0 0 24 22" fill="none" stroke="#1e6b4e" stroke-width="1.8"><path d="M3 8v6h4l5 4V4L7 8H3z"/><path d="M16 7c2 2 2 6 0 8M19 4c3.5 3.5 3.5 10.5 0 14"/></svg>
+      <span>Callout Box</span>
+    </div>
+    <h3>La Métrica de Éxito:</h3>
+    <p class="metric">Similitud Coseno (Cosine Distance)<br>+ Filtros Estrictos de Payload.</p>
+    <p class="body">El sistema no solo debe encontrar el texto, debe filtrar cruzando normativas y perfiles demográficos.</p>
+  </div>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 2:25 - 2:45</b><br>
+• Introducción a la validación experimental.<br>
+• Sometimos el motor a 5 escenarios progresivos de estrés cognitivo (Q1 a Q5).<br>
+• Criterio de éxito: Similitud Coseno alta y cumplimiento estricto del filtro booleano de payload.
+</aside>
+</section>
+
+<section class="slide s7" id="q1">
+  <div class="deco-lines"></div>
+  <div class="frame"></div>
+  <h1 class="slide-title" style="left:65px;top:32px;font-size:44px">Escenario Q1: Diagnóstico y Estratificación</h1>
+
+  <div class="dx">
+    <div class="dx-head">Tarjeta de Diagnóstico</div>
+    <div class="dx-body">
+      <h3>Input: Criterios Clínicos y Algoritmo</h3>
+      <div class="green-rule"></div>
+      <p>¿Cuáles son los criterios clínicos para diagnosticar angina típica y cuál es el algoritmo de estratificación de riesgo en dolor torácico?</p>
+    </div>
+  </div>
+
+  <div class="v-arrow" style="left:372px;top:278px;height:80px"></div>
+
+  <div class="gear-badge" style="left:132px;top:352px">
+    <svg viewBox="0 0 48 48" fill="none" stroke="#2fd79a" stroke-width="2.2">
+      <circle cx="24" cy="24" r="7"/>
+      <path d="M24 4v6M24 38v6M4 24h6M38 24h6M9.9 9.9l4.3 4.3M33.8 33.8l4.3 4.3M38.1 9.9l-4.3 4.3M14.2 33.8l-4.3 4.3"/>
+    </svg>
+  </div>
+  <div class="filter">
+    <h3>Filtro: doc_type</h3>
+    <div class="green-rule" style="width:54px"></div>
+    <p>doc_type: 'clinical_guideline'</p>
+  </div>
+
+  <div class="v-arrow" style="left:372px;top:500px;height:62px"></div>
+
+  <div class="out">
+    <h3>Output: Algoritmo de Decisión Clínica</h3>
+    <div class="green-rule" style="width:54px"></div>
+    <p>Guía de Práctica Clínica: Algoritmo de Decisión Clínica y Priorización 1. Todo paciente con angina típica (Tipo 1) y factores de riesgo...</p>
+  </div>
+
+  <img class="gauge" src="assets/s7-gauge.png" style="left:728px;top:130px" alt="Medidor de similitud coseno">
+  <div class="ghost gauge-value" style="left:878px;top:371px;width:292px" aria-hidden="true">0.6154</div>
+  <div class="ghost" style="left:890px;top:544px;width:280px;font-size:19px" aria-hidden="true">SIMILITUD COSENO<br>(COSINE DISTANCE)</div>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 2:45 - 3:05</b><br>
+• Escenario Q1: Diagnóstico de angina típica y algoritmo de estratificación de riesgo.<br>
+• Filtro aplicado: doc_type = 'clinical_guideline'.<br>
+• Resultado: Guía de decisión clínica recuperada con similitud coseno de 0.6154.
+</aside>
+</section>
+
+<section class="slide s8" id="q2">
+  <div class="deco-lines"></div>
+  <div class="frame"></div>
+  <h1 class="slide-title" style="left:75px;top:28px;font-size:41px">Escenario Q2: Análisis de Pruebas de Esfuerzo<br>(Ergometría)</h1>
+
+  <div class="dx">
+    <div class="dx-head">Tarjeta de Diagnóstico</div>
+    <div class="dx-inner">
+      <div class="q-box q-input">
+        <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="7" y="5" width="24" height="30" rx="3"/><circle cx="27" cy="27" r="8"/><path d="M33 33l8 8M13 12h11M13 18h8"/></svg>
+        <h3>Input: Criterios Clínicos y Algoritmo</h3>
+        <p>¿Qué significado clínico tiene una depresión del segmento ST mayor a 2 mm con pendiente plana o descendente durante la prueba de esfuerzo?</p>
+      </div>
+      <div class="q-box q-filter">
+        <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="#128a5a" stroke-width="2.2"><circle cx="24" cy="24" r="7"/><path d="M24 5v5M24 38v5M5 24h5M38 24h5M10.6 10.6l3.5 3.5M33.9 33.9l3.5 3.5M37.4 10.6l-3.5 3.5M14.1 33.9l-3.5 3.5"/></svg>
+        <h3>Filtro: doc_type</h3>
+        <span class="tag">doc_type: “diagnostic_protocol”</span>
+      </div>
+      <div class="q-box q-output">
+        <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="#128a5a" stroke-width="2.2"><circle cx="24" cy="24" r="18"/><path d="M15 24l6 6 12-12"/></svg>
+        <h3>Output: Algoritmo de Decisión Clínica</h3>
+        <p>Protocolo Clínico de Pruebas de Esfuerzo: 3.1. Depresión del Segmento ST Inducida por Esfuerzo (Oldpeak) - Medición: Descenso del punto J...</p>
+      </div>
+      <div class="v-arrow arrow-1"></div>
+      <div class="v-arrow arrow-2"></div>
+    </div>
+  </div>
+
+  <img class="gauge" src="assets/s8-gauge.png" style="left:735px;top:160px" alt="Medidor de similitud coseno">
+  <div class="ghost gauge-value" style="left:876px;top:381px;width:270px;font-size:80px" aria-hidden="true">0.5733</div>
+  <div class="ghost" style="left:735px;top:677px;width:533px;font-size:21px" aria-hidden="true">SIMILITUD COSENO (COSINE DISTANCE)</div>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 3:05 - 3:25</b><br>
+• Escenario Q2: Análisis de ergometría y depresión del segmento ST (&gt;2 mm).<br>
+• Filtro aplicado: doc_type = 'diagnostic_protocol'.<br>
+• Resultado: Protocolo de esfuerzo cardiológico recuperado con similitud coseno de 0.5733.
+</aside>
+</section>
+
+<section class="slide s9" id="q3">
+  <div class="deco-lines"></div>
+  <div class="frame"></div>
+  <h1 class="slide-title" style="left:55px;top:28px;font-size:42px">Escenario Q3: Metas Farmacológicas Cardiovasculares</h1>
+
+  <div class="dx">
+    <span class="dx-label">Tarjeta de Diagnóstico</span>
+
+    <div class="row r-input">
+      <svg class="ico" viewBox="0 0 64 64" fill="none" stroke="#0b2b4a" stroke-width="3">
+        <rect x="10" y="11" width="35" height="45" rx="3"/>
+        <rect x="21" y="5" width="14" height="10" rx="2"/>
+        <circle cx="29" cy="34" r="10" stroke="#128a5a"/>
+        <path d="M37 42l8 8" stroke="#128a5a"/>
+      </svg>
+      <h3>Input: Criterios Clínicos y Algoritmo</h3>
+      <p>¿Cuáles son las metas de c-LDL con estatinas de alta potencia y el esquema de doble antiagregación plaquetaria con aspirina y ticagrelor?</p>
+    </div>
+
+    <div class="v-arrow arrow-1"></div>
+
+    <div class="row r-filter">
+      <svg class="ico" viewBox="0 0 64 64" fill="none" stroke="#0b2b4a" stroke-width="2.6">
+        <path d="M24 8h10v10h10v10H44v10H34v10H24V38H14V28h10z" fill="#2e8f6d"/>
+        <rect x="34" y="42" width="26" height="12" rx="6" transform="rotate(-38 47 48)" fill="#a9e8cd"/>
+      </svg>
+      <h3>Filtro: doc_type</h3>
+      <p><span class="mono">doc_type: ‘pharmacology_protocol’</span></p>
+    </div>
+
+    <div class="v-arrow arrow-2"></div>
+
+    <div class="row r-output">
+      <svg class="ico" viewBox="0 0 64 64" fill="none" stroke="#0b2b4a" stroke-width="3">
+        <rect x="10" y="11" width="35" height="45" rx="3"/>
+        <rect x="21" y="5" width="14" height="10" rx="2"/>
+        <path d="M21 36l8 8 14-16" stroke="#128a5a" stroke-width="3.4"/>
+      </svg>
+      <h3>Output: Protocolo de Decisión Clínica</h3>
+      <p>Protocolo Clínico de Manejo Terapéutico:<br>2.2. Optimización Lipídica Agresiva<br>- Meta de Colesterol LDL (c-LDL):<br>-Reducción &gt;= 50% respecto al valor basal...</p>
+    </div>
+  </div>
+
+  <img class="gauge" src="assets/s9-gauge.png" style="left:850px;top:145px" alt="Medidor de similitud coseno">
+  <div class="ghost gauge-value" style="left:978px;top:466px;width:258px;font-size:76px" aria-hidden="true">0.5764</div>
+  <div class="ghost" style="left:850px;top:624px;width:408px;font-size:23px" aria-hidden="true">SIMILITUD COSENO<br>(COSINE DISTANCE)</div>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 3:25 - 3:45</b><br>
+• Escenario Q3: Farmacología cardiológica (metas c-LDL y antiagregación dual con ticagrelor).<br>
+• Filtro aplicado: doc_type = 'pharmacology_protocol'.<br>
+• Resultado: Protocolo terapéutico recuperado con similitud coseno de 0.5764.
+</aside>
+</section>
+
+<section class="slide s10" id="q4">
+  <div class="deco-lines"></div>
+  <div class="frame"></div>
+  <h1 class="slide-title" style="left:50px;top:30px;font-size:41px">Escenario Q4: Filtrado Multivariable Complejo de Paciente</h1>
+
+  <div class="dx">
+    <div class="dx-head">Tarjeta de Diagnóstico</div>
+    <div class="dx-inner">
+      <div class="q-box q-input">
+        <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="#17324d" stroke-width="2.2"><circle cx="21" cy="21" r="12"/><path d="M30 30l9 9"/></svg>
+        <h3>Input: Criterios Clínicos y Algoritmo</h3>
+        <p>Paciente masculino mayor de 60 años con angina típica, hipertensión estadio 2, fluoroscopia con vasos mayores comprometidos y alto riesgo...</p>
+      </div>
+
+      <div class="filter-block">
+        <h3>Filtro: Lógica Multivariable Compleja</h3>
+        <svg class="logic" width="576" height="180" viewBox="0 0 576 180" fill="none" font-family="Inter, sans-serif">
+          <defs>
+            <linearGradient id="q4green" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#43e0a4"/><stop offset="1" stop-color="#15916a"/>
+            </linearGradient>
+          </defs>
+          <g stroke="#265a78" stroke-width="1.5">
+            <path d="M176 20l49 21M176 62l49-21"/>
+            <path d="M176 110l49 21M176 152l49-21"/>
+            <path d="M225 41h50v45"/>
+            <path d="M225 131h50v-45"/>
+            <path d="M325 86h95M420 86h80"/>
+          </g>
+          <g font-size="10.5" fill="#16324d">
+            <rect x="2" y="9" width="174" height="22" rx="11" fill="#f5fafc" stroke="#8fa8bb"/>
+            <text x="12" y="24">doc_type: "patient_record"</text>
+            <rect x="2" y="51" width="174" height="22" rx="11" fill="#f5fafc" stroke="#8fa8bb"/>
+            <text x="12" y="66">sex: "Masculino"</text>
+            <rect x="2" y="99" width="174" height="22" rx="11" fill="#f5fafc" stroke="#8fa8bb"/>
+            <text x="12" y="114">disease_present: true</text>
+            <rect x="2" y="141" width="174" height="22" rx="11" fill="#f5fafc" stroke="#8fa8bb"/>
+            <text x="12" y="156">age &gt;= 60</text>
+          </g>
+          <g font-size="9" font-weight="600" fill="#123a5c" text-anchor="middle">
+            <g transform="translate(225 41)"><rect x="-21" y="-13" width="42" height="26" rx="4" transform="rotate(45)" fill="#eaf4f8" stroke="#265a78"/><text y="3">AND</text></g>
+            <g transform="translate(225 131)"><rect x="-21" y="-13" width="42" height="26" rx="4" transform="rotate(45)" fill="#eaf4f8" stroke="#265a78"/><text y="3">AND</text></g>
+            <g transform="translate(325 86)"><rect x="-17" y="-12" width="34" height="24" rx="4" transform="rotate(45)" fill="#eaf4f8" stroke="#265a78"/><text y="3">OR</text></g>
+            <g transform="translate(420 86)"><rect x="-21" y="-13" width="42" height="26" rx="4" transform="rotate(45)" fill="#eaf4f8" stroke="#265a78"/><text y="3">AND</text></g>
+          </g>
+          <g>
+            <rect x="502" y="66" width="42" height="38" rx="6" fill="url(#q4green)"/>
+            <path d="M514 85l7 7 12-14" stroke="#eafff6" stroke-width="2.8"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="q-box q-output">
+        <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="#17324d" stroke-width="2.1">
+          <rect x="7" y="8" width="28" height="34" rx="3"/><rect x="16" y="4" width="11" height="7" rx="2"/>
+          <path d="M13 21h14M13 28h10"/><circle cx="33" cy="35" r="8" fill="#fff"/><path d="M29 35l3 3 6-7"/>
+        </svg>
+        <h3>Output: Resultado de Paciente</h3>
+        <p>Paciente#125: HISTORIA CLÍNICA CARDIOLÓGICA. Datos Demográficos: Paciente de 65 años de edad, sexo Masculino. Angina típica...</p>
+      </div>
+    </div>
+  </div>
+
+  <img class="gauge" src="assets/s10-gauge.png" style="left:790px;top:135px" alt="Medidor de similitud coseno">
+  <div class="ghost gauge-value" style="left:922px;top:460px;width:288px;font-size:84px" aria-hidden="true">0.7014</div>
+  <div class="ghost" style="left:790px;top:672px;width:458px;font-size:20px" aria-hidden="true">SIMILITUD COSENO<br>(COSINE DISTANCE)</div>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 3:45 - 4:10</b><br>
+• Escenario Q4: Filtrado multivariable complejo combinando edad (&gt;=60), sexo (Masculino), angina típica y presencia de enfermedad.<br>
+• Filtro lógico: AND/OR en árbol de condiciones sobre el índice de payload de Qdrant.<br>
+• Resultado: Paciente #125 con la similitud más alta del benchmark: 0.7014.
+</aside>
+</section>
+
+<section class="slide s11" id="q5">
+  <div class="deco-lines"></div>
+  <div class="frame"></div>
+  <div class="kicker">The Digital Pulse</div>
+  <h1 class="slide-title" style="left:100px;top:56px;font-size:41px">Escenario Q5: Inferencia Semántica Global (Cross-Modal)</h1>
+
+  <div class="big-card">
+    <div class="big-head">Tarjeta de Diagnóstico</div>
+
+    <div class="q-box q-input">
+      <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="#17324d" stroke-width="2.4"><circle cx="20" cy="20" r="12"/><path d="M29 29l10 10"/></svg>
+      <h3>Input: Criterios Clínicos y Algoritmo</h3>
+      <p>Tratamiento de revascularización y pronóstico para defecto de perfusión reversible en gammagrafía SPECT con angina inducida por ejercicio</p>
+    </div>
+
+    <div class="v-arrow arrow-1"></div>
+
+    <div class="q-box q-filter">
+      <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="#128a5a" stroke-width="2.2">
+        <rect x="4" y="20" width="20" height="16" rx="3"/><path d="M8 20v-5a6 6 0 0112 0v5"/>
+        <circle cx="33" cy="32" r="10"/><path d="M23 32h20M33 22c4 4 4 16 0 20M33 22c-4 4-4 16 0 20"/>
+      </svg>
+      <h3>Filtro: doc_type</h3>
+      <p>Sin filtro estricto (Búsqueda sobre todo el corpus)</p>
+    </div>
+
+    <div class="v-arrow arrow-2"></div>
+
+    <div class="q-box q-output">
+      <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="#17324d" stroke-width="2.1">
+        <rect x="7" y="8" width="28" height="34" rx="3"/><rect x="16" y="4" width="11" height="7" rx="2"/>
+        <path d="M13 21h14M13 28h9"/><circle cx="33" cy="35" r="8" fill="#fff"/><path d="M29 35l3 3 6-7"/>
+      </svg>
+      <h3>Output: Resultado de Paciente</h3>
+      <p>Protocolo Clínico de Pruebas de Esfuerzo: 5. Centellografía de Perfusión Miocárdica / Gammagrafía (Thal). Estudio con radiotrazadores...</p>
+    </div>
+  </div>
+
+  <img class="gauge" src="assets/s11-gauge.png" style="left:795px;top:190px" alt="Medidor de similitud coseno">
+  <div class="ghost gauge-value" style="left:920px;top:452px;width:256px;font-size:76px" aria-hidden="true">0.5676</div>
+  <div class="ghost" style="left:795px;top:640px;width:450px;font-size:20px" aria-hidden="true">SIMILITUD COSENO (COSINE DISTANCE)</div>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 4:10 - 4:30</b><br>
+• Escenario Q5: Búsqueda global cross-modal (gammagrafía SPECT y angina) sin ningún filtro estricto.<br>
+• Evalúa la capacidad del espacio latente puro para discriminar entre 349 fragmentos heterogéneos.<br>
+• Similitud alcanzada: 0.5676 recuperando exactamente la sección de perfusión miocárdica.
+</aside>
+</section>
+
+<section class="slide s12" id="rendimiento">
+  <div class="frame"></div>
+  <svg style="position:absolute;left:0;top:72px;width:70px;height:60px" viewBox="0 0 70 60" fill="none">
+    <path d="M0 30h60" stroke="#25b57c" stroke-width="1.6"/>
+  </svg>
+  <svg style="position:absolute;left:1000px;top:20px;width:360px;height:80px" viewBox="0 0 360 80" fill="none">
+    <path d="M0 40h120l8-34 8 58 9-42 9 26 10-8h186" stroke="#17324d" stroke-width="1.6"/>
+  </svg>
+  <h1 class="slide-title" style="left:80px;top:36px;font-size:46px">Rendimiento Cuantitativo del Motor RAG</h1>
+
+  <p class="chart-title" style="left:135px">Distribución de Similitud Coseno por Consulta (Top-5)</p>
+  <svg class="chart" style="position:absolute;left:90px;top:206px;width:565px;height:345px" viewBox="0 0 565 345" fill="none">
+    <g font-family="Inter, sans-serif" font-size="13" fill="#2b3c4c">
+      <path d="M40 4v298h525" stroke="#2b3c4c" stroke-width="1.4" fill="none"/>
+      <text x="30" y="306" text-anchor="end">0.0</text>
+      <text x="30" y="266" text-anchor="end">0.1</text>
+      <text x="30" y="226" text-anchor="end">0.2</text>
+      <text x="30" y="187" text-anchor="end">0.3</text>
+      <text x="30" y="147" text-anchor="end">0.4</text>
+      <text x="30" y="107" text-anchor="end">0.5</text>
+      <text x="30" y="67" text-anchor="end">0.6</text>
+      <text x="30" y="27" text-anchor="end">0.7</text>
+    </g>
+    <g stroke="#2b3c4c" stroke-width="1.3">
+      <path d="M93 84v76M77 84h32M93 232v55M77 287h32"/>
+      <rect x="63" y="160" width="61" height="72" fill="#0b2f53" stroke="#2ec98c" stroke-width="2"/>
+      <path d="M63 194h61" stroke="#8ff0c9" stroke-width="2.4"/>
+
+      <path d="M198 106v71M182 106h32M198 247v40M182 287h32"/>
+      <rect x="168" y="177" width="61" height="70" fill="#0b2f53" stroke="#2ec98c" stroke-width="2"/>
+      <path d="M168 214h61" stroke="#8ff0c9" stroke-width="2.4"/>
+
+      <path d="M303 91v74M287 91h32M303 230v47M287 277h32"/>
+      <rect x="273" y="165" width="61" height="65" fill="#0b2f53" stroke="#2ec98c" stroke-width="2"/>
+      <path d="M273 198h61" stroke="#8ff0c9" stroke-width="2.4"/>
+
+      <path d="M408 17v73M392 17h32M408 169v90M392 259h32"/>
+      <rect x="378" y="90" width="61" height="79" fill="#0b2f53" stroke="#2ec98c" stroke-width="2"/>
+      <path d="M378 122h61" stroke="#8ff0c9" stroke-width="2.4"/>
+
+      <path d="M512 102v69M496 102h32M512 235v52M496 287h32"/>
+      <rect x="482" y="171" width="61" height="64" fill="#0b2f53" stroke="#2ec98c" stroke-width="2"/>
+      <path d="M482 203h61" stroke="#8ff0c9" stroke-width="2.4"/>
+    </g>
+    <g font-family="Inter, sans-serif" font-size="14" fill="#2b3c4c" text-anchor="middle">
+      <text x="93" y="322">Q1</text><text x="198" y="322">Q2</text><text x="303" y="322">Q3</text>
+      <text x="408" y="322">Q4</text><text x="512" y="322">Q5</text>
+    </g>
+  </svg>
+
+  <p class="chart-title" style="left:750px">Similitud Media por Rango de Recuperación</p>
+  <svg class="chart" style="position:absolute;left:700px;top:206px;width:600px;height:345px" viewBox="0 0 600 345" fill="none">
+    <g font-family="Inter, sans-serif" font-size="13" fill="#4a8f78">
+      <path d="M45 5v294h535" stroke="#8fd9bf" stroke-width="1.6" fill="none"/>
+      <text x="35" y="303" text-anchor="end">0.0</text>
+      <text x="35" y="260" text-anchor="end">0.1</text>
+      <text x="35" y="216" text-anchor="end">0.2</text>
+      <text x="35" y="173" text-anchor="end">0.3</text>
+      <text x="35" y="130" text-anchor="end">0.4</text>
+      <text x="35" y="86" text-anchor="end">0.5</text>
+      <text x="35" y="43" text-anchor="end">0.6</text>
+    </g>
+    <g>
+      <rect x="66" y="37" width="80" height="262" fill="#0b2f53" stroke="#2ec98c" stroke-width="2.4"/>
+      <rect x="170" y="80" width="80" height="219" fill="#0b2f53"/>
+      <rect x="274" y="110" width="80" height="189" fill="#0b2f53"/>
+      <rect x="378" y="136" width="80" height="163" fill="#0b2f53"/>
+      <rect x="483" y="156" width="80" height="143" fill="#0b2f53"/>
+    </g>
+    <text x="66" y="30" font-family="Inter, sans-serif" font-size="17" fill="#22a874">0.607</text>
+    <g font-family="Inter, sans-serif" font-size="14" fill="#2b3c4c" text-anchor="middle">
+      <text x="106" y="323">1</text><text x="210" y="323">2</text><text x="314" y="323">3</text>
+      <text x="418" y="323">4</text><text x="523" y="323">5</text>
+      <text x="314" y="342" font-size="15">Rango ración</text>
+    </g>
+  </svg>
+
+  <div class="insight" style="left:85px;width:600px">
+    <svg width="52" height="42" viewBox="0 0 52 42" fill="none"><path d="M5 22l12 13L47 5" stroke="#22b573" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>Alta especificidad diagnóstica:</b> La similitud media en el <span class="green">Top-1</span> alcanza <span class="green">0.607</span>, separándose claramente del ruido de los rangos inferiores.
+  </div>
+  <div class="insight" style="left:710px;width:600px">
+    <svg width="60" height="40" viewBox="0 0 60 40" fill="none"><path d="M4 20h36" stroke="#22b573" stroke-width="7" stroke-linecap="round"/><path d="M34 6l16 14-16 14" stroke="#22b573" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <b>Consistencia operativa</b> en todo el espectro de consultas <span class="green">(Q1-Q5)</span>.
+  </div>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 4:30 - 4:55</b><br>
+• Análisis de métricas:<br>
+  - El Top-1 alcanza una similitud media de 0.607, con caída escalonada clara hacia Top-5.<br>
+  - La alta dispersión controlada garantiza que el sistema no alucina ni confunde patologías.<br>
+  - Consistencia demostrada a lo largo de las 5 consultas evaluadas.
+</aside>
+</section>
+
+<section class="slide s13" id="conclusiones">
+  <div class="deco-lines"></div>
+  <div class="frame"></div>
+  <svg class="ecg" style="left:0;top:20px;width:130px;height:80px" viewBox="0 0 130 80" fill="none">
+    <path d="M0 41h40l7-16 9 42 9-58 9 36 9-9h47" stroke="#8fa6b8" stroke-width="1.4"/>
+  </svg>
+  <svg class="ecg" style="right:0;top:20px;width:230px;height:120px;opacity:.35" viewBox="0 0 230 120" fill="none">
+    <path d="M0 80h60l14 20 12-71 15 94 16-60 14 24 12-14h87" stroke="#7f9bb3" stroke-width="1.2"/>
+    <path d="M100 20h120M100 34h90M100 48h70" stroke="#9fb3c4" stroke-width="1"/>
+  </svg>
+  <h1 class="slide-title" style="left:78px;top:44px;font-size:52px">Conclusiones de la Arquitectura</h1>
+
+  <div class="concl" style="top:128px">
+    <img src="assets/s13-icon-1.png" width="145" height="120" alt="Cronómetro con rayo">
+    <p><b>Desempeño y Latencia:</b> El clúster remoto en Qdrant Cloud logró respuestas en tiempo real con una latencia inferior a <span class="green">150 ms</span> (mediana operativa de <span class="green">103 ms</span>), incluso al combinar recuperación vectorial con filtros booleanos complejos.</p>
+  </div>
+
+  <div class="concl" style="top:330px">
+    <img src="assets/s13-icon-2.png" width="150" height="125" alt="Escudo con símbolo de dólar">
+    <p><span class="green">Costo Cero Real:</span> La arquitectura mantiene una operación 100% permanente sobre capas gratuitas (Qdrant Free Tier de 1GB y modelo de embeddings local).</p>
+  </div>
+
+  <div class="concl" style="top:532px">
+    <img src="assets/s13-icon-3.png" width="160" height="135" alt="Red de nodos conectados">
+    <p><span class="green">Integración Multimodal:</span> La transformación de bases de datos estáticas (tabulares) a viñetas narrativas enriquecidas demostró ser un puente altamente efectivo para cruzar historias de pacientes con guías médicas oficiales.</p>
+  </div>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 4:55 - 5:15</b><br>
+• Conclusiones principales:<br>
+  1) Desempeño: Mediana de búsqueda en Qdrant Cloud de 103 ms (inferior al límite de 150 ms).<br>
+  2) Viabilidad financiera: Operación 100% permanente a costo $0.00 USD.<br>
+  3) Innovación: Eficacia probada de la técnica de viñetas narrativas para datos tabulares en RAG.
+</aside>
+</section>
+
+<section class="slide s14" id="interactua">
+  <div class="deco-lines"></div>
+  <div class="frame"></div>
+  <img class="laptop" src="assets/s14-laptop.png" alt="Portátil mostrando el panel clínico de la aplicación">
+  <h1 class="slide-title" style="left:75px;top:62px;font-size:54px;letter-spacing:-1.6px">Interactúa con la Arquitectura</h1>
+  <p style="position:absolute;left:80px;top:160px;margin:0;font-size:26px;color:#17324d">Aplicación desplegada y código fuente abierto.</p>
+
+  <a class="link-card" style="top:225px" href="https://computacionenlanube-cu9zun4f6qttrmagtochzs.streamlit.app/" target="_blank" rel="noopener noreferrer" title="Abrir panel clínico en vivo en Streamlit Cloud">
+    <img src="assets/s14-icon-1.png" width="95" height="95" alt="Streamlit">
+    <div>
+      <h3>Prueba el panel clínico<br>en vivo:</h3>
+      <span class="url">https://computacionenlanube-cu9zun4f6qttrmagtochzs.streamlit.app/</span>
+      <span class="badge-action">Abrir Demo en Vivo ↗</span>
+    </div>
+  </a>
+
+  <a class="link-card" style="top:405px" href="https://github.com/jaimecabrera911/computacion_en_la_nube" target="_blank" rel="noopener noreferrer" title="Explorar el repositorio y documentación en GitHub">
+    <img src="assets/s14-icon-2.png" width="95" height="95" alt="GitHub">
+    <div>
+      <h3>Explora el repositorio y la documentación:</h3>
+      <span class="url">https://github.com/jaimecabrera911/computacion_en_la_nube</span>
+      <span class="badge-action">Ver Código en GitHub ↗</span>
+    </div>
+  </a>
+
+  <a class="link-card" style="top:585px" href="https://drive.google.com/drive/folders/1O8AycALqKCR8xAiA4TptvrnrvcGKQMy9?usp=sharing" target="_blank" rel="noopener noreferrer" title="Ver video de sustentación en Google Drive">
+    <img src="assets/s14-icon-3.png" width="95" height="95" alt="YouTube / Video">
+    <div>
+      <h3>Mira el video de demostración:</h3>
+      <span class="url">https://drive.google.com/drive/folders/1O8AycALqKCR8xAiA4TptvrnrvcGKQMy9?usp=sharing</span>
+      <span class="badge-action">Ver Video en Drive ↗</span>
+    </div>
+  </a>
+
+  <aside class="notes">
+<b>Tiempo sugerido: 5:15 - 5:30</b><br>
+• Cierre de la sustentación:<br>
+  - Demostración interactiva disponible en Streamlit Community Cloud.<br>
+  - Código fuente, scripts de benchmarking y datos abiertos en GitHub.<br>
+  - Video de sustentación en Google Drive.<br>
+• Quedamos atentos a las preguntas del docente y jurado.
+</aside>
+</section>
+    </div>
+  </div>
+
+  <!-- Shortcuts Help Modal -->
+  <div class="shortcuts-modal" id="shortcuts-modal">
+    <div class="shortcuts-card">
+      <h3>
+        <span>Atajos de Navegación</span>
+        <button id="btn-close-shortcuts" style="background:none;border:none;color:#8fa8bb;cursor:pointer;font-size:22px;line-height:1;">&times;</button>
+      </h3>
+      <div class="shortcuts-list">
+        <div class="shortcut-row"><span>Siguiente diapositiva</span><div><kbd>→</kbd> <kbd>Espacio</kbd></div></div>
+        <div class="shortcut-row"><span>Diapositiva anterior</span><div><kbd>←</kbd></div></div>
+        <div class="shortcut-row"><span>Vista general (Overview)</span><div><kbd>O</kbd> o <kbd>ESC</kbd></div></div>
+        <div class="shortcut-row"><span>Modo ponente (Speaker Notes)</span><div><kbd>S</kbd></div></div>
+        <div class="shortcut-row"><span>Pantalla completa</span><div><kbd>F</kbd></div></div>
+        <div class="shortcut-row"><span>Hacer zoom a un elemento</span><div><kbd>Alt</kbd> + <kbd>Click</kbd></div></div>
+        <div class="shortcut-row"><span>Cerrar modal de ayuda</span><div><kbd>?</kbd> o <kbd>ESC</kbd></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reveal.js Scripts -->
+  <script src="vendor/reveal.js/dist/reveal.js"></script>
+  <script src="vendor/reveal.js/plugin/notes/notes.js"></script>
+  <script src="vendor/reveal.js/plugin/zoom/zoom.js"></script>
+  <script src="js/presentation.js"></script>
+</body>
+</html>

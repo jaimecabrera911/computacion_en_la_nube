@@ -44,6 +44,15 @@ class Settings:
     vector_dimension: int = 384
     distance_metric: Distance = Distance.COSINE
 
+    # --- Modelo generativo vía API (Harogo, compatible con OpenAI) ---------
+    generative_api_base: str = os.getenv(
+        "GENERATIVE_API_BASE", "https://api.harogo.ai/v1"
+    ).strip()
+    generative_api_key: str = os.getenv("GENERATIVE_API_KEY", "").strip()
+    generative_model_name: str = os.getenv(
+        "GENERATIVE_MODEL_NAME", "deepseek-v4.1-flash-1017"
+    ).strip()
+
     # --- Estrategia de fragmentación ---
     chunk_size: int = 512
     chunk_overlap: int = 64
